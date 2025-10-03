@@ -1,0 +1,18 @@
+<!-- Weather-Based Health Tips -->
+<div class="space-y-4">
+    <h2 class="text-xl font-semibold text-gray-900">Weather-Based Tips</h2>
+
+    <div class="grid md:grid-cols-2 gap-4">
+        {% if health_tips %}
+            {% for tip in health_tips %}
+                {% include 'user/components/health/tip_card.html' with tip=tip %}
+            {% endfor %}
+        {% else %}
+            <!-- Default Tips -->
+            {% include 'user/components/health/tip_card.html' with tip=uv_tip %}
+            {% include 'user/components/health/tip_card.html' with tip=hydration_tip %}
+            {% include 'user/components/health/tip_card.html' with tip=clothing_tip %}
+            {% include 'user/components/health/tip_card.html' with tip=air_quality_tip %}
+        {% endif %}
+    </div>
+</div>

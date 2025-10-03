@@ -1,0 +1,66 @@
+<!-- Weather Overview Component -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Temperature Card -->
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Temperature</p>
+                <p class="text-3xl font-bold text-gray-900">{{ current_temp|default:"--" }}°C</p>
+                <p class="text-sm text-gray-500">Feels like {{ feels_like|default:"--" }}°C</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Humidity Card -->
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Humidity</p>
+                <p class="text-3xl font-bold text-gray-900">{{ humidity|default:"--" }}%</p>
+                <p class="text-sm text-gray-500">{{ humidity_status|default:"Normal" }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wind Speed Card -->
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Wind Speed</p>
+                <p class="text-3xl font-bold text-gray-900">{{ wind_speed|default:"--" }}<span class="text-lg"> m/s</span></p>
+                <p class="text-sm text-gray-500">{{ wind_direction|default:"--" }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h1a1 1 0 011 1v2M7 4H5a1 1 0 000 2h2M7 4v2a1 1 0 002 0V4M15 10l2-2m0 0l2-2m-2 2h4"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Air Quality Card -->
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">Air Quality</p>
+                <p class="text-3xl font-bold text-gray-900">{{ air_quality|default:"--" }}</p>
+                <p class="text-sm text-gray-500">{{ air_quality_status|default:"Moderate" }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>

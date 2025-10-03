@@ -1,0 +1,209 @@
+{% extends "admin/layouts/base.html" %}
+
+{% block title %}Weather Chatbot - ClimaChat Admin{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Weather Chatbot</h1>
+    <p class="text-gray-600 mt-2">Test and monitor the weather chatbot responses</p>
+</div>
+
+<div class="max-w-6xl mx-auto">
+    {% include 'admin/components/chat/chat_interface.html' %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Real-time weather chatbot using Groq API
+document.addEventListener('DOMContentLoaded', function() {
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Store conversation history for context
+    let conversationHistory = [];
+    let isLoading = false;
+
+    function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    function addMessage(content, isUser = true, isLoading = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+
+        const time = getCurrentTime();
+        let messageContent = '';
+
+        if (isLoading) {
+            messageContent = `
+                <div class="max-w-xs lg:max-w-md bg-gray-100 text-gray-900 rounded-lg px-3 py-2">
+                    <p class="text-xs text-gray-500 mb-1">Weather Bot</p>
+                    <div class="flex items-center space-x-1">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                        </div>
+                        <span class="text-xs text-gray-500 ml-2">Thinking...</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            messageContent = `
+                <div class="max-w-xs lg:max-w-md ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg px-3 py-2">
+                    ${!isUser ? '<p class="text-xs text-gray-500 mb-1">Weather Bot</p>' : ''}
+                    <p class="text-sm whitespace-pre-wrap">${content}</p>
+                    <p class="text-xs ${isUser ? 'text-blue-100' : 'text-gray-500'} mt-1">${time}</p>
+                </div>
+            `;
+        }
+
+        messageDiv.innerHTML = messageContent;
+        chatMessages.appendChild(messageDiv);
+
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        return messageDiv;
+    }
+
+    function removeMessage(messageElement) {
+        if (messageElement && messageElement.parentNode) {
+            messageElement.parentNode.removeChild(messageElement);
+        }
+    }
+
+    async function sendMessageToAPI(message) {
+        try {
+            const response = await fetch('/api/chatbot/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    conversation_history: conversationHistory
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Add to conversation history
+                conversationHistory.push(
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: data.response }
+                );
+
+                // Keep only last 10 exchanges (20 messages) for context
+                if (conversationHistory.length > 20) {
+                    conversationHistory = conversationHistory.slice(-20);
+                }
+
+                return {
+                    success: true,
+                    response: data.response,
+                    fallback: data.fallback || false
+                };
+            } else {
+                throw new Error(data.error || 'Unknown error');
+            }
+        } catch (error) {
+            console.error('Chatbot API error:', error);
+            return {
+                success: false,
+                response: "I'm experiencing some technical difficulties right now. Please try again in a moment, or ask me about weather information!"
+            };
+        }
+    }
+
+    async function sendMessage() {
+        if (isLoading) return;
+
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        // Disable input while processing
+        isLoading = true;
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+
+        // Add user message
+        addMessage(message, true);
+        chatInput.value = '';
+
+        // Add loading indicator
+        const loadingMessage = addMessage('', false, true);
+
+        try {
+            // Send to API
+            const result = await sendMessageToAPI(message);
+
+            // Remove loading indicator
+            removeMessage(loadingMessage);
+
+            // Add bot response
+            addMessage(result.response, false);
+
+            if (result.fallback) {
+                console.warn('Using fallback response due to API issues');
+            }
+
+        } catch (error) {
+            // Remove loading indicator
+            removeMessage(loadingMessage);
+
+            // Add error message
+            addMessage("I'm sorry, I'm having trouble right now. Please try again later!", false);
+        } finally {
+            // Re-enable input
+            isLoading = false;
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            `;
+            chatInput.focus();
+        }
+    }
+
+    // Clear default "no messages" content on first message
+    function clearDefaultContent() {
+        const defaultContent = chatMessages.querySelector('.text-center');
+        if (defaultContent) {
+            chatMessages.innerHTML = '';
+        }
+    }
+
+    // Event listeners
+    sendBtn.addEventListener('click', function() {
+        clearDefaultContent();
+        sendMessage();
+    });
+
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            clearDefaultContent();
+            sendMessage();
+        }
+    });
+
+    // Add welcome message on load
+    setTimeout(() => {
+        clearDefaultContent();
+        addMessage("Hello! I'm ClimaChat, your AI weather assistant powered by Llama 3.3. I'm here to help you with weather information, forecasts, and weather-related questions. How can I assist you today?", false);
+    }, 500);
+});
+</script>
+{% endblock %}

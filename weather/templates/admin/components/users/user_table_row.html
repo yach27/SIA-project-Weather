@@ -1,0 +1,39 @@
+<!-- User Table Row Template -->
+<template id="user-row-template">
+    <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+            <input type="checkbox" class="user-checkbox rounded border-gray-300 text-blue-600" data-user-id="">
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium user-avatar">
+                    <!-- Avatar initials will be inserted here -->
+                </div>
+                <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900 user-name"><!-- Name --></div>
+                    <div class="text-sm text-gray-500 user-email"><!-- Email --></div>
+                </div>
+            </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full user-status">
+                <!-- Status -->
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full user-role">
+                <!-- Role -->
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 user-location"><!-- Location --></td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 user-last-active"><!-- Last Active --></td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm space-x-1">
+            <button data-action="view" class="text-blue-600 hover:text-blue-800">View</button>
+            <button data-action="edit" class="text-green-600 hover:text-green-800">Edit</button>
+            <button data-action="suspend" class="text-yellow-600 hover:text-yellow-800 user-suspend-btn">
+                <!-- Suspend/Unsuspend -->
+            </button>
+            <button data-action="delete" class="text-red-600 hover:text-red-800">Delete</button>
+        </td>
+    </tr>
+</template>

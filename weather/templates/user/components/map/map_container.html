@@ -1,0 +1,22 @@
+<!-- Map Container with Sidebar -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="flex">
+        {% include 'user/components/map/weather_info_panel.html' %}
+
+        <!-- Map Container -->
+        <div class="flex-1 relative">
+            <div id="weather-map" class="map-container relative" style="height: 70vh; min-height: 500px;"></div>
+
+            <!-- Map Legend -->
+            {% include 'user/components/map/map_legend.html' %}
+
+            <!-- Map Loading Indicator -->
+            <div id="map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600">Loading map...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

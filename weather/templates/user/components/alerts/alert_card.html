@@ -1,0 +1,29 @@
+<!-- Alert Card Component -->
+<div class="bg-white rounded-lg border border-gray-200 p-4 mb-3 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div class="flex items-start justify-between">
+        <div class="flex-1">
+            <!-- Alert Header -->
+            <div class="flex items-center mb-2">
+                <div class="w-3 h-3 rounded-full mr-3 {% if alert.severity == 'severe' %}bg-red-500{% elif alert.severity == 'moderate' %}bg-yellow-500{% else %}bg-blue-500{% endif %}"></div>
+                <h3 class="font-semibold text-gray-900">{{ alert.title }}</h3>
+            </div>
+
+            <!-- Alert Description -->
+            <p class="text-gray-600 text-sm mb-3 leading-relaxed">{{ alert.description }}</p>
+
+            <!-- Alert Meta Info -->
+            <div class="flex items-center text-xs text-gray-500 space-x-4">
+                <span>{{ alert.issued_at|date:"M d, Y" }}</span>
+                <span>{{ alert.issued_at|date:"H:i" }}</span>
+                {% if alert.expires_at %}
+                    <span>Expires: {{ alert.expires_at|date:"M d, H:i" }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Close Button -->
+        <button class="text-gray-400 hover:text-gray-600 transition-colors duration-200 ml-4 p-1 rounded-full hover:bg-gray-100">
+            <span class="text-lg">×</span>
+        </button>
+    </div>
+</div>

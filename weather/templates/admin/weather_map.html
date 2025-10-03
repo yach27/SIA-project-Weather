@@ -1,0 +1,23 @@
+{% extends 'admin/layouts/base.html' %}
+
+{% block title %}Weather Map - ClimaChat Admin{% endblock %}
+
+{% block page_title %}Weather Map{% endblock %}
+{% block page_subtitle %}Interactive weather visualization and monitoring{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {% include 'admin/components/map/weather_controls.html' %}
+    {% include 'admin/components/map/map_container.html' %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% load static %}{% static 'js/weather_map.js' %}"></script>
+{% endblock %}

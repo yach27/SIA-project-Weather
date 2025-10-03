@@ -1,0 +1,21 @@
+<!-- Weather Alerts Container -->
+<div class="space-y-4">
+    <!-- Alerts Header -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Weather Alerts</h2>
+        {% if active_alerts %}
+            <span class="text-sm text-gray-500">{{ active_alerts|length }} active</span>
+        {% endif %}
+    </div>
+
+    <!-- Alerts List -->
+    {% if active_alerts %}
+        <div class="space-y-3">
+            {% for alert in active_alerts %}
+                {% include 'user/components/alerts/alert_card.html' with alert=alert %}
+            {% endfor %}
+        </div>
+    {% else %}
+        {% include 'user/components/alerts/no_alerts.html' %}
+    {% endif %}
+</div>

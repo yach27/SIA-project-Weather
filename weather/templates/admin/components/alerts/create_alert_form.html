@@ -1,0 +1,130 @@
+<!-- Modern Alert Creation Form -->
+<div class="p-8">
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex-1"></div>
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+            🚨 Create Weather Alert
+        </h2>
+        <div class="flex-1 flex justify-end">
+            <button id="close-alert-modal" class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <form id="alert-form" class="space-y-6">
+        <!-- Alert Type -->
+        <div class="space-y-2">
+            <label for="alert-type" class="block text-sm font-semibold text-gray-800 mb-3">Alert Type</label>
+            <select id="alert-type" name="alert_type" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors duration-200 text-gray-700">
+                <option value="severe_weather">Severe Weather Warning</option>
+                <option value="storm">Storm Alert</option>
+                <option value="temperature">Temperature Advisory</option>
+                <option value="flood">Flood Warning</option>
+            </select>
+        </div>
+
+        <!-- Alert Title -->
+        <div class="space-y-2">
+            <label for="alert-title" class="block text-sm font-semibold text-gray-800 mb-3">Alert Title</label>
+            <input type="text" id="alert-title" name="title" placeholder="e.g., Severe Thunderstorm Warning" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors duration-200 text-gray-700 placeholder-gray-400">
+        </div>
+
+        <!-- Alert Message -->
+        <div class="space-y-2">
+            <label for="alert-message" class="block text-sm font-semibold text-gray-800 mb-3">Alert Message</label>
+            <textarea id="alert-message" name="message" rows="4" placeholder="Detailed description of the weather alert..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors duration-200 text-gray-700 placeholder-gray-400 resize-none"></textarea>
+        </div>
+
+        <!-- Send To -->
+        <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-800 mb-4">Send To</label>
+            <div class="space-y-3">
+                <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" name="user_selection" value="all" checked class="w-5 h-5 text-red-600 focus:ring-red-500">
+                    <span class="ml-3 text-sm font-medium text-gray-700">📢 All Users</span>
+                </label>
+                <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" name="user_selection" value="location" class="w-5 h-5 text-red-600 focus:ring-red-500">
+                    <span class="ml-3 text-sm font-medium text-gray-700">🌍 By Location</span>
+                </label>
+                <label class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" name="user_selection" value="specific" class="w-5 h-5 text-red-600 focus:ring-red-500">
+                    <span class="ml-3 text-sm font-medium text-gray-700">👥 Specific Users</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Location Selection -->
+        <div id="location-selection" class="hidden">
+            <label for="target-areas" class="block text-sm font-medium text-gray-700 mb-2">Select Locations</label>
+            <select id="target-areas" name="target_areas" multiple class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="new_york">New York</option>
+                <option value="chicago">Chicago</option>
+                <option value="los_angeles">Los Angeles</option>
+                <option value="houston">Houston</option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Hold Ctrl/Cmd to select multiple</p>
+        </div>
+
+        <!-- Specific Users Selection -->
+        <div id="specific-users-selection" class="hidden">
+            <label for="user-search" class="block text-sm font-medium text-gray-700 mb-2">Search & Select Users</label>
+            <div class="relative mb-3">
+                <input type="text" id="user-search" placeholder="Search users by name or email..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Selected Users Display -->
+            <div id="selected-users" class="mb-3">
+                <div class="flex flex-wrap gap-2" id="user-tags">
+                    <!-- Selected user tags will appear here -->
+                </div>
+            </div>
+
+            <!-- User List -->
+            <div class="border border-gray-300 rounded-md max-h-32 overflow-y-auto">
+                <div id="user-list" class="p-2">
+                    <div class="user-item p-2 hover:bg-gray-100 rounded cursor-pointer" data-user-id="1" data-user-name="John Doe" data-user-email="john@example.com">
+                        <div class="font-medium text-sm">John Doe</div>
+                        <div class="text-xs text-gray-500">john@example.com</div>
+                    </div>
+                    <div class="user-item p-2 hover:bg-gray-100 rounded cursor-pointer" data-user-id="2" data-user-name="Jane Smith" data-user-email="jane@example.com">
+                        <div class="font-medium text-sm">Jane Smith</div>
+                        <div class="text-xs text-gray-500">jane@example.com</div>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">Click on users to select/deselect them</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+            <button type="button" id="clear-form" class="px-6 py-3 text-gray-600 hover:text-gray-800 rounded-xl border border-gray-300 hover:border-gray-400 transition-colors duration-200 font-medium">
+                 Clear Form
+            </button>
+            <button type="submit" id="send-alert" class="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-xl hover:from-red-700 hover:to-orange-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                 Send Alert
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Simple Preview Modal -->
+<div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">Alert Preview</h3>
+                <button id="close-preview" class="text-gray-400 hover:text-gray-600">×</button>
+            </div>
+            <div id="preview-content"></div>
+            <div class="mt-6 text-center">
+                <button id="send-from-preview" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    Send This Alert
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

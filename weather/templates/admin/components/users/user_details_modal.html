@@ -1,0 +1,32 @@
+<!-- User Details Modal Content Template -->
+<template id="user-details-template">
+    <div class="space-y-4">
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl font-bold user-modal-avatar">
+                <!-- Avatar -->
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold user-modal-name"><!-- Name --></h4>
+                <p class="text-gray-600 user-modal-email"><!-- Email --></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div><span class="font-medium">Status:</span> <span class="capitalize user-modal-status"><!-- Status --></span></div>
+            <div><span class="font-medium">Role:</span> <span class="capitalize user-modal-role"><!-- Role --></span></div>
+            <div><span class="font-medium">Location:</span> <span class="user-modal-location"><!-- Location --></span></div>
+            <div><span class="font-medium">Last Active:</span> <span class="user-modal-last-active"><!-- Last Active --></span></div>
+            <div><span class="font-medium">Join Date:</span> <span class="user-modal-join-date"><!-- Join Date --></span></div>
+            <div><span class="font-medium">User ID:</span> <span class="user-modal-id">#<!-- ID --></span></div>
+        </div>
+
+        <div class="flex space-x-3 pt-4 border-t">
+            <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 user-modal-edit-btn" data-action="edit">
+                Edit User
+            </button>
+            <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 user-modal-suspend-btn" data-action="suspend">
+                <!-- Suspend/Unsuspend -->
+            </button>
+        </div>
+    </div>
+</template>

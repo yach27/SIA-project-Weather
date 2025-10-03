@@ -1,0 +1,111 @@
+{% extends "user/layouts/base.html" %}
+
+{% block title %}Dashboard - ClimaChat{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+{% block page_title %}Weather Dashboard{% endblock %}
+{% block page_subtitle %}Stay informed about current weather conditions{% endblock %}
+
+{% block content %}
+<!-- Weather Alerts Section -->
+{% include 'user/components/alerts/weather_alerts.html' %}
+
+<!-- Weather Overview Cards -->
+{% include 'user/components/weather/weather_overview.html' %}
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Main Weather Info -->
+    <div class="lg:col-span-3">
+        {% include 'user/components/weather/detailed_weather.html' %}
+
+        <!-- Health & Safety Tips -->
+        {% include 'user/components/health/health_tips.html' %}
+    </div>
+
+    <!-- Sidebar Content -->
+    <div class="lg:col-span-1">
+        <!-- Quick Chat Access -->
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white mb-6">
+            <h3 class="text-lg font-semibold mb-2">Ask ClimaChat</h3>
+            <p class="text-blue-100 text-sm mb-4">Get instant weather information and personalized advice.</p>
+            <a href="{% url 'user_chat' %}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span class="text-sm font-medium">Start Chat</span>
+            </a>
+        </div>
+
+        <!-- Weather Map Preview -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Weather Map</h3>
+                <a href="{% url 'weather_map' %}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    View Full Map
+                </a>
+            </div>
+            <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                <div id="dashboard-map" class="w-full h-full"></div>
+                <div id="dashboard-map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                        <p class="text-xs text-gray-500">Loading map...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Dashboard mini map
+let dashboardMap;
+
+function initDashboardMap() {
+    dashboardMap = L.map('dashboard-map', {
+        zoomControl: false,
+        scrollWheelZoom: false,
+        dragging: false,
+        touchZoom: false,
+        doubleClickZoom: false
+    }).setView([40.7128, -74.0060], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(dashboardMap);
+
+    // Hide loading indicator
+    document.getElementById('dashboard-map-loading').style.display = 'none';
+
+    // Make map clickable to go to full map
+    dashboardMap.on('click', function() {
+        window.location.href = "{% url 'weather_map' %}";
+    });
+}
+
+// Auto-refresh weather data every 5 minutes
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dashboard map
+    if (document.getElementById('dashboard-map')) {
+        initDashboardMap();
+    }
+
+    setInterval(() => {
+        // Add refresh logic here
+        console.log('Refreshing weather data...');
+    }, 300000); // 5 minutes
+
+    // Add click handlers for alert dismissal
+    document.querySelectorAll('[data-dismiss-alert]').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.border-l-4').style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

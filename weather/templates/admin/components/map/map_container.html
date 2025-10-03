@@ -1,0 +1,51 @@
+<!-- Map Container with Admin Sidebar -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="flex">
+        {% include 'admin/components/map/weather_info_panel.html' %}
+
+        <!-- Map Container -->
+        <div class="flex-1 relative">
+            <div id="weather-map" class="map-container relative" style="height: 70vh; min-height: 500px;"></div>
+
+            <!-- Map Legend -->
+            {% include 'user/components/map/map_legend.html' %}
+
+            <!-- Map Loading Indicator -->
+            <div id="map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-600">Loading map...</p>
+                </div>
+            </div>
+
+            <!-- Admin Alert Creation Overlay -->
+            <div id="alert-creation-overlay" class="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 hidden" style="width: 300px;">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-semibold text-gray-800">Create Alert for Area</h4>
+                    <button id="close-alert-overlay" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <select class="w-full text-xs p-2 border rounded" id="quick-alert-type">
+                        <option value="severe_weather">Severe Weather</option>
+                        <option value="storm">Storm Alert</option>
+                        <option value="temperature">Temperature Advisory</option>
+                        <option value="flood">Flood Warning</option>
+                    </select>
+                    <textarea class="w-full text-xs p-2 border rounded resize-none" rows="3" placeholder="Alert message..." id="quick-alert-message"></textarea>
+                    <div class="flex space-x-2">
+                        <button id="send-quick-alert" class="flex-1 px-3 py-2 bg-red-600 text-white text-xs rounded hover:bg-red-700">
+                            Send Alert
+                        </button>
+                        <button id="cancel-quick-alert" class="flex-1 px-3 py-2 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

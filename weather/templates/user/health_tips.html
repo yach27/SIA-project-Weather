@@ -1,0 +1,19 @@
+{% extends 'user/layouts/base.html' %}
+
+{% block title %}Health & Safety - ClimaChat{% endblock %}
+
+{% block page_title %}Health & Safety{% endblock %}
+{% block page_subtitle %}Weather-based health recommendations for your wellbeing{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+    <!-- Current Health Conditions -->
+    {% include 'user/components/health/current_conditions.html' %}
+
+    <!-- Weather-Based Health Tips -->
+    {% include 'user/components/health/weather_based_tips.html' %}
+
+    <!-- Safety Guidelines -->
+    {% include 'user/components/health/safety_guidelines.html' %}
+</div>
+{% endblock %}

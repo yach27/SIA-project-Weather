@@ -1,0 +1,50 @@
+<!-- Detailed Weather Information -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Detailed Weather Information</h2>
+        <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            Refresh
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- UV Index -->
+        <div class="p-4 border border-gray-100 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">UV Index</span>
+                <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">{{ uv_index|default:"--" }}</p>
+            <p class="text-sm text-gray-500">{{ uv_status|default:"Moderate" }}</p>
+        </div>
+
+        <!-- Visibility -->
+        <div class="p-4 border border-gray-100 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Visibility</span>
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">{{ visibility|default:"--" }} km</p>
+            <p class="text-sm text-gray-500">{{ visibility_status|default:"Good" }}</p>
+        </div>
+
+        <!-- Pressure -->
+        <div class="p-4 border border-gray-100 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Pressure</span>
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">{{ pressure|default:"--" }} hPa</p>
+            <p class="text-sm text-gray-500">{{ pressure_status|default:"Normal" }}</p>
+        </div>
+
+
+    </div>
+</div>

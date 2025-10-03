@@ -1,0 +1,124 @@
+<!-- Alert Statistics -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Alert Performance Chart -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Alert Performance</h3>
+                <p class="text-sm text-gray-600">Last 7 days overview</p>
+            </div>
+            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 3 months</option>
+            </select>
+        </div>
+
+        <!-- Simple Chart Placeholder -->
+        <div class="h-48 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center mb-4">
+            <div class="text-center">
+                <div class="text-4xl text-blue-500 mb-2">📊</div>
+                <p class="text-sm text-gray-600">Chart visualization</p>
+                <p class="text-xs text-gray-500">(Integration with Chart.js needed)</p>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="p-3 bg-green-50 rounded-lg">
+                <div class="text-lg font-bold text-green-600">98.5%</div>
+                <div class="text-xs text-green-700">Delivery Success</div>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-lg">
+                <div class="text-lg font-bold text-blue-600">2.3s</div>
+                <div class="text-xs text-blue-700">Avg. Send Time</div>
+            </div>
+            <div class="p-3 bg-purple-50 rounded-lg">
+                <div class="text-lg font-bold text-purple-600">87%</div>
+                <div class="text-xs text-purple-700">User Engagement</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Alert History -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Recent Alert History</h3>
+                <p class="text-sm text-gray-600">Last 10 sent alerts</p>
+            </div>
+            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                View All History
+            </button>
+        </div>
+
+        <!-- History List -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">Severe Thunderstorm</div>
+                        <div class="text-xs text-gray-600">Dec 15, 14:30 • 1,247 users</div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Delivered
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">Winter Advisory</div>
+                        <div class="text-xs text-gray-600">Dec 15, 12:15 • 834 users</div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Delivered
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">Heat Advisory</div>
+                        <div class="text-xs text-gray-600">Dec 14, 16:45 • 2,156 users</div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Delivered
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">Tornado Watch</div>
+                        <div class="text-xs text-gray-600">Dec 14, 13:20 • 892 users</div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Expired
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">Flood Warning</div>
+                        <div class="text-xs text-gray-600">Dec 13, 09:30 • 567 users</div>
+                    </div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Delivered
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+

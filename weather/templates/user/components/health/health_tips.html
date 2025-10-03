@@ -1,0 +1,114 @@
+<!-- Health & Safety Tips Component -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Health & Safety Tips</h2>
+        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Weather-Based</span>
+    </div>
+
+    <div class="space-y-4">
+        {% if health_tips %}
+            {% for tip in health_tips %}
+                <div class="p-3 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                            {% if tip.category == 'uv' %}
+                                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            {% elif tip.category == 'temperature' %}
+                                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            {% elif tip.category == 'humidity' %}
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            {% else %}
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-medium text-gray-900 mb-1">{{ tip.title }}</h3>
+                            <p class="text-sm text-gray-600">{{ tip.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <!-- Default Health Tips -->
+            <div class="p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">UV Protection</h3>
+                        <p class="text-sm text-gray-600">Wear sunscreen with SPF 30+ when UV index is high (above 6).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Stay Hydrated</h3>
+                        <p class="text-sm text-gray-600">Drink plenty of water, especially during hot and humid weather.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Dress Appropriately</h3>
+                        <p class="text-sm text-gray-600">Layer clothing for changing temperatures and carry an umbrella if rain is expected.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Air Quality</h3>
+                        <p class="text-sm text-gray-600">Limit outdoor activities when air quality index is poor (above 150).</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>

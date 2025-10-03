@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ClimaChat Admin{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 font-sans">
+
+<div class="flex min-h-screen">
+    {% include 'admin/components/sidebar/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 bg-gray-50 ml-64">
+        <div class="p-6">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}{% endblock %}
+
+<script>
+// Add click effects to sidebar items
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarLinks = document.querySelectorAll('nav a');
+
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Add a brief click effect for immediate feedback
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 100);
+        });
+    });
+});
+</script>
+</body>
+</html>
