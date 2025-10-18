@@ -154,6 +154,16 @@ def chatbot_api(request):
         data = json.loads(request.body)
         user_message = data.get('message', '').strip()
         conversation_history = data.get('conversation_history', [])
+        user_location = data.get('user_location', None)  # Get location from frontend
+        current_weather_data = data.get('current_weather_data', None)  # Get current weather from map
+
+        # If no location provided, try to get from user profile
+        if not user_location:
+            try:
+                if hasattr(request.user, 'profile') and request.user.profile.location:
+                    user_location = request.user.profile.location
+            except:
+                pass
 
         if not user_message:
             return JsonResponse({
@@ -167,7 +177,9 @@ def chatbot_api(request):
         # Get response from chatbot
         result = chatbot_service.get_chatbot_response(
             user_message=user_message,
-            conversation_history=conversation_history
+            conversation_history=conversation_history,
+            user_location=user_location,
+            current_weather_data=current_weather_data
         )
 
         if result['success']:
@@ -178,6 +190,11 @@ def chatbot_api(request):
                 'usage': result.get('usage'),
                 'weather_data': result.get('weather_data', False)
             }
+
+            # If current weather data was provided from frontend, include it in response
+            if current_weather_data:
+                response_data['weather_info'] = current_weather_data
+                return JsonResponse(response_data)
 
             # If weather data was used, include the structured weather info
             if result.get('weather_data'):
@@ -193,19 +210,7 @@ def chatbot_api(request):
                                 break
 
                     if weather_info['success']:
-                        # Add coordinates to weather info
-                        weather_service = get_weather_service()
-                        coord_result = weather_service.get_current_weather(city=location)
-                        if not coord_result['success']:
-                            # Try with the same suffix that worked for weather data
-                            for suffix in [',US', ',PH', ',JP', ',UK', ',CA']:
-                                coord_result = weather_service.get_current_weather(city=f'{location}{suffix}')
-                                if coord_result['success']:
-                                    break
-
-                        if coord_result['success']:
-                            weather_info['coordinates'] = coord_result['data']['location']['coordinates']
-                            weather_info['condition_main'] = coord_result['data']['current']['condition_main']
+                        # Weather info now includes coordinates and condition_main
                         response_data['weather_info'] = weather_info
 
             return JsonResponse(response_data)
@@ -577,14 +582,23 @@ def extract_location_from_message(message: str) -> str:
 
     message_lower = message.lower()
     location_patterns = [
+        # Pattern: "weather today of X" - Most specific first
+        r'(?:weather|temperature|temp)\s+(?:today|now|tonight|tomorrow)\s+(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+        # Pattern: "weather in/of/at X"
         r'(?:weather|temperature|temp|humidity|wind|forecast)\s+(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+        # Pattern: "in/of X weather"
         r'(?:in|at|for|of)\s+([A-Za-z\s]+?)\s+(?:weather|temperature|temp|humidity|wind|forecast)',
+        # Pattern: "what/how is weather in X"
         r'(?:what.*?|how.*?)\s+(?:weather|temperature|temp|humidity|wind|forecast).*?(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+        # Pattern: "X weather"
         r'([A-Za-z\s]+?)\s+(?:weather|temperature|temp|humidity|wind|forecast)(?:\?|$|,|\.|!)',
-        r'weather\s+(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+        # Pattern: "current/today weather in X"
         r'(?:current|today.*?)\s+(?:weather|temperature|temp|humidity|wind|forecast).*?(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+        # Pattern: "the X weather"
         r'(?:the\s+)?([A-Za-z\s]+?)\s+(?:weather|temperature|temp|humidity|wind|forecast)(?:\s+today|\s+now|$|\?|!|,|\.)',
+        # Pattern: "weather of/in X"
         r'(?:the\s+)?(?:weather|temperature|temp|humidity|wind|forecast)\s+(?:of|in|at|for)\s+([A-Za-z\s]+?)(?=\s+(?:today|now|tomorrow)|$|\?|!|,|\.)',
+        # Follow-up patterns
         r'(?:how about|what about)\s+(?:the\s+)?(?:weather\s+(?:in|of|for)\s+)?([A-Za-z\s]+?)(?:\s+weather|$|\?|!|,|\.)',
         r'(?:and|also)\s+(?:the\s+)?(?:weather\s+(?:in|of|for)\s+)?([A-Za-z\s]+?)(?:\s+weather|$|\?|!|,|\.)',
     ]
@@ -637,19 +651,21 @@ def get_weather_for_chatbot(city: str = None, lat: float = None, lon: float = No
         if result['success']:
             data = result['data']
 
-            # Format for chatbot response
+            # Format for chatbot response with coordinates
             return {
                 'success': True,
                 'location': f"{data['location']['name']}, {data['location']['country']}",
                 'temperature': f"{data['current']['temperature']}°C",
                 'feels_like': f"{data['current']['feels_like']}°C",
                 'condition': data['current']['condition'],
+                'condition_main': data['current']['condition_main'],
                 'humidity': f"{data['current']['humidity']}%",
                 'wind_speed': f"{data['current']['wind_speed']} km/h",
                 'pressure': f"{data['current']['pressure']} hPa",
                 'visibility': f"{data['current']['visibility']} km",
                 'sunrise': data['sun']['sunrise'],
                 'sunset': data['sun']['sunset'],
+                'coordinates': data['location']['coordinates'],
                 'summary': f"Current weather in {data['location']['name']}: {data['current']['condition']}, {data['current']['temperature']}°C (feels like {data['current']['feels_like']}°C). Humidity: {data['current']['humidity']}%, Wind: {data['current']['wind_speed']} km/h."
             }
         else:

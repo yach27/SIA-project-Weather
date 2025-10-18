@@ -48,20 +48,36 @@ When you receive real weather data in the format [REAL WEATHER DATA: ...], use t
 
 Keep responses conversational but informative."""
 
-    def get_chatbot_response(self, user_message: str, conversation_history: Optional[list] = None) -> Dict[str, Any]:
+    def get_chatbot_response(self, user_message: str, conversation_history: Optional[list] = None, user_location: str = None, current_weather_data: dict = None) -> Dict[str, Any]:
         """
         Get response from Groq API for the user message
 
         Args:
             user_message (str): The user's input message
             conversation_history (list, optional): Previous conversation messages
+            user_location (str, optional): User's location for weather queries
+            current_weather_data (dict, optional): Current weather data from the map
 
         Returns:
             Dict containing response data or error information
         """
         try:
-            # Check if this is a weather query and get real weather data
-            weather_info = self._check_weather_query(user_message)
+            # If current weather data is provided (from map), use it directly for general queries
+            weather_info = None
+            if current_weather_data:
+                # Format the weather data
+                weather_info = (
+                    f"Location: {current_weather_data.get('location', 'Unknown')}, "
+                    f"Temperature: {current_weather_data.get('temperature', 'N/A')} "
+                    f"(feels like {current_weather_data.get('feels_like', 'N/A')}), "
+                    f"Condition: {current_weather_data.get('condition', 'N/A')}, "
+                    f"Humidity: {current_weather_data.get('humidity', 'N/A')}, "
+                    f"Wind: {current_weather_data.get('wind_speed', 'N/A')}, "
+                    f"Pressure: {current_weather_data.get('pressure', 'N/A')}"
+                )
+            else:
+                # Check if this is a weather query and get real weather data
+                weather_info = self._check_weather_query(user_message, user_location)
 
             # Build messages array
             messages = [
@@ -112,11 +128,12 @@ Keep responses conversational but informative."""
                 error_msg = f"API request failed with status {response.status_code}"
                 logger.error(f"Groq API error: {error_msg}")
 
-                # If we have weather data but AI failed, return weather data directly
+                # If we have weather data but AI failed, return formatted weather response
                 if weather_info:
+                    formatted_response = self._format_weather_response(weather_info, user_message)
                     return {
                         'success': True,
-                        'response': weather_info,
+                        'response': formatted_response,
                         'weather_data': True,
                         'fallback': True
                     }
@@ -130,11 +147,12 @@ Keep responses conversational but informative."""
         except requests.exceptions.Timeout:
             logger.error("Groq API request timed out")
 
-            # If we have weather data but AI timed out, return weather data
+            # If we have weather data but AI timed out, return formatted weather response
             if weather_info:
+                formatted_response = self._format_weather_response(weather_info, user_message)
                 return {
                     'success': True,
-                    'response': weather_info,
+                    'response': formatted_response,
                     'weather_data': True,
                     'fallback': True
                 }
@@ -147,11 +165,12 @@ Keep responses conversational but informative."""
         except requests.exceptions.RequestException as e:
             logger.error(f"Groq API request error: {str(e)}")
 
-            # If we have weather data but AI failed, return weather data
+            # If we have weather data but AI failed, return formatted weather response
             if weather_info:
+                formatted_response = self._format_weather_response(weather_info, user_message)
                 return {
                     'success': True,
-                    'response': weather_info,
+                    'response': formatted_response,
                     'weather_data': True,
                     'fallback': True
                 }
@@ -164,11 +183,12 @@ Keep responses conversational but informative."""
         except Exception as e:
             logger.error(f"Unexpected error in chatbot service: {str(e)}")
 
-            # If we have weather data but AI failed, return weather data
+            # If we have weather data but AI failed, return formatted weather response
             if weather_info:
+                formatted_response = self._format_weather_response(weather_info, user_message)
                 return {
                     'success': True,
-                    'response': weather_info,
+                    'response': formatted_response,
                     'weather_data': True,
                     'fallback': True
                 }
@@ -178,6 +198,68 @@ Keep responses conversational but informative."""
                 'error': str(e),
                 'fallback_response': "I'm having technical difficulties. Please try again later."
             }
+
+    def _format_weather_response(self, weather_info: str, user_message: str) -> str:
+        """
+        Format weather information into a conversational response
+
+        Args:
+            weather_info (str): Raw weather data string
+            user_message (str): The user's original message
+
+        Returns:
+            str: Formatted conversational response
+        """
+        try:
+            # Parse the weather info string to create a nice response
+            # Weather info format: "Location: X, Temperature: Y°C (feels like Z°C), Condition: W, ..."
+
+            # Extract key information using simple string parsing
+            parts = {}
+            for item in weather_info.split(', '):
+                if ': ' in item:
+                    key, value = item.split(': ', 1)
+                    parts[key.strip()] = value.strip()
+
+            location = parts.get('Location', 'the requested location')
+            temp = parts.get('Temperature', 'N/A')
+            feels_like = parts.get('feels like', 'N/A').replace(')', '')
+            condition = parts.get('Condition', 'N/A')
+            humidity = parts.get('Humidity', 'N/A')
+            wind = parts.get('Wind', 'N/A')
+
+            # Determine if asking about current weather or general query
+            message_lower = user_message.lower()
+            is_current = any(word in message_lower for word in ['now', 'current', 'today', 'right now'])
+
+            if is_current:
+                response = f"The current weather in {location} is {condition.lower()} with a temperature of {temp}"
+            else:
+                response = f"In {location}, it's currently {condition.lower()} with a temperature of {temp}"
+
+            # Add feels like if different
+            if feels_like and feels_like != 'N/A':
+                response += f" (feels like {feels_like})"
+
+            response += f". The humidity is at {humidity}"
+
+            if wind and wind != 'N/A':
+                response += f", and winds are blowing at {wind}"
+
+            response += "."
+
+            # Add a helpful closing
+            if 'rain' in condition.lower() or 'storm' in condition.lower():
+                response += " You might want to bring an umbrella!"
+            elif 'clear' in condition.lower() or 'sunny' in condition.lower():
+                response += " It's a great day to be outside!"
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error formatting weather response: {str(e)}")
+            # Fallback to simple format
+            return f"Here's the weather information: {weather_info}"
 
     def _get_fallback_response(self, user_message: str) -> str:
         """
@@ -203,12 +285,13 @@ Keep responses conversational but informative."""
         else:
             return "I'm ClimaChat, your weather assistant! I'm currently experiencing some technical difficulties, but I'm here to help with weather-related questions. Please try again in a moment."
 
-    def _check_weather_query(self, user_message: str) -> Optional[str]:
+    def _check_weather_query(self, user_message: str, user_location: str = None) -> Optional[str]:
         """
         Check if the user message is asking for weather information and get real data
 
         Args:
             user_message (str): The user's message
+            user_location (str, optional): User's saved location or detected location
 
         Returns:
             str: Weather information if found, None otherwise
@@ -218,26 +301,57 @@ Keep responses conversational but informative."""
         # Weather query patterns
         weather_keywords = ['weather', 'temperature', 'temp', 'forecast', 'rain', 'sunny', 'cloudy', 'wind', 'humidity', 'today', 'now', 'tomorrow']
         location_patterns = [
+            # Pattern: "weather today of X" - Most specific first
+            r'(?:weather|temperature|temp)\s+(?:today|now|tonight|tomorrow)\s+(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+            # Pattern: "weather in/of/at X"
             r'(?:weather|temperature|temp|humidity|wind|forecast)\s+(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+            # Pattern: "in/of X weather"
             r'(?:in|at|for|of)\s+([A-Za-z\s]+?)\s+(?:weather|temperature|temp|humidity|wind|forecast)',
+            # Pattern: "what/how is weather in X"
             r'(?:what.*?|how.*?)\s+(?:weather|temperature|temp|humidity|wind|forecast).*?(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+            # Pattern: "X weather"
             r'([A-Za-z\s]+?)\s+(?:weather|temperature|temp|humidity|wind|forecast)(?:\?|$|,|\.|!)',
-            r'weather\s+(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+            # Pattern: "current/today weather in X"
             r'(?:current|today.*?)\s+(?:weather|temperature|temp|humidity|wind|forecast).*?(?:in|at|for|of)\s+([A-Za-z\s]+?)(?:\?|$|,|\.|!)',
+            # Pattern: "the X weather"
             r'(?:the\s+)?([A-Za-z\s]+?)\s+(?:weather|temperature|temp|humidity|wind|forecast)(?:\s+today|\s+now|$|\?|!|,|\.)',
+            # Pattern: "weather of/in X"
             r'(?:the\s+)?(?:weather|temperature|temp|humidity|wind|forecast)\s+(?:of|in|at|for)\s+([A-Za-z\s]+?)(?=\s+(?:today|now|tomorrow)|$|\?|!|,|\.)',
+            # Follow-up patterns
             r'(?:how about|what about)\s+(?:the\s+)?(?:weather\s+(?:in|of|for)\s+)?([A-Za-z\s]+?)(?:\s+weather|$|\?|!|,|\.)',
             r'(?:and|also)\s+(?:the\s+)?(?:weather\s+(?:in|of|for)\s+)?([A-Za-z\s]+?)(?:\s+weather|$|\?|!|,|\.)',
         ]
 
-        # Check if it's a weather query or location follow-up
-        is_weather_query = any(keyword in message_lower for keyword in weather_keywords)
-        is_location_followup = any(phrase in message_lower for phrase in ['how about', 'what about', 'and', 'also'])
+        # ALWAYS look for capitalized words (city/country names) first
+        location = None
+        words = user_message.split()
+        # Skip common words that are capitalized (sentence starters, pronouns, etc.)
+        skip_words = ['I', 'What', 'When', 'Where', 'How', 'Why', 'Who', 'Is', 'Are', 'The', 'A', 'An', 'Tell', 'Show', 'Give', 'Can', 'Will', 'Would', 'Should', 'Could', 'My', 'Me', 'It']
 
-        if is_weather_query or is_location_followup:
-            # Try to extract location
-            location = None
+        # First pass: Look for any capitalized words (potential city/country names)
+        for i, word in enumerate(words):
+            # Remove punctuation from word for checking
+            clean_word = word.rstrip('?!.,;:')
 
+            if clean_word in skip_words or len(clean_word) <= 1:
+                continue
+
+            if clean_word[0].isupper():
+                # Check if it's followed by more capitalized words (multi-word place names)
+                location_parts = [clean_word]
+                for j in range(i + 1, len(words)):
+                    if j < len(words) and words[j]:
+                        next_word = words[j].rstrip('?!.,;:')
+                        if len(next_word) > 0 and next_word[0].isupper() and next_word not in skip_words:
+                            location_parts.append(next_word)
+                        else:
+                            break
+                location = ' '.join(location_parts)
+                if len(location) > 2:
+                    break
+
+        # If no capitalized word found, try pattern matching
+        if not location:
             for pattern in location_patterns:
                 match = re.search(pattern, message_lower)
                 if match:
@@ -249,44 +363,36 @@ Keep responses conversational but informative."""
                     if location:  # Only use if location remains after cleaning
                         break
 
-            # If no location found, check for direct mentions of place names
-            if not location:
-                # Simple location extraction - look for capitalized words that might be places
-                words = user_message.split()
-                for i, word in enumerate(words):
-                    if word[0].isupper() and len(word) > 2:
-                        # Check if it's followed by more capitalized words
-                        location_parts = [word]
-                        for j in range(i + 1, len(words)):
-                            if j < len(words) and words[j][0].isupper():
-                                location_parts.append(words[j])
-                            else:
-                                break
-                        location = ' '.join(location_parts)
-                        break
+        # Check if it's a weather query
+        is_weather_query = any(keyword in message_lower for keyword in weather_keywords)
 
-            if location:
-                # Get weather data using the weather service
-                try:
-                    from ..views import get_weather_for_chatbot
-                    weather_data = get_weather_for_chatbot(city=location)
+        # If still no location found but it's a weather query, use user's location
+        if not location and is_weather_query and user_location:
+            location = user_location
 
+        # If we found a location, fetch weather for it
+        if location:
+            # Get weather data using the weather service
+            try:
+                from ..views import get_weather_for_chatbot
+                weather_data = get_weather_for_chatbot(city=location)
+
+                if weather_data['success']:
+                    # Format comprehensive weather data for AI
+                    formatted_data = f"Location: {weather_data['location']}, Temperature: {weather_data['temperature']} (feels like {weather_data['feels_like']}), Condition: {weather_data['condition']}, Humidity: {weather_data['humidity']}, Wind: {weather_data['wind_speed']}, Pressure: {weather_data['pressure']}, Visibility: {weather_data['visibility']}, Sunrise: {weather_data['sunrise']}, Sunset: {weather_data['sunset']}"
+                    return formatted_data
+                else:
+                    # Try with Philippines suffix for local places
+                    weather_data = get_weather_for_chatbot(city=f"{location},PH")
                     if weather_data['success']:
-                        # Format comprehensive weather data for AI
                         formatted_data = f"Location: {weather_data['location']}, Temperature: {weather_data['temperature']} (feels like {weather_data['feels_like']}), Condition: {weather_data['condition']}, Humidity: {weather_data['humidity']}, Wind: {weather_data['wind_speed']}, Pressure: {weather_data['pressure']}, Visibility: {weather_data['visibility']}, Sunrise: {weather_data['sunrise']}, Sunset: {weather_data['sunset']}"
                         return formatted_data
                     else:
-                        # Try with Philippines suffix for local places
-                        weather_data = get_weather_for_chatbot(city=f"{location},PH")
-                        if weather_data['success']:
-                            formatted_data = f"Location: {weather_data['location']}, Temperature: {weather_data['temperature']} (feels like {weather_data['feels_like']}), Condition: {weather_data['condition']}, Humidity: {weather_data['humidity']}, Wind: {weather_data['wind_speed']}, Pressure: {weather_data['pressure']}, Visibility: {weather_data['visibility']}, Sunrise: {weather_data['sunrise']}, Sunset: {weather_data['sunset']}"
-                            return formatted_data
-                        else:
-                            return None  # Let AI handle this case
+                        return None  # Let AI handle this case
 
-                except Exception as e:
-                    logger.error(f"Error getting weather data: {str(e)}")
-                    return None  # Let AI handle error cases
+            except Exception as e:
+                logger.error(f"Error getting weather data: {str(e)}")
+                return None  # Let AI handle error cases
 
         return None
 
