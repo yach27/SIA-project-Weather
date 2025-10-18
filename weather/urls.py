@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/weather/current/', views.get_current_weather_api, name='current_weather_api'),
     path('api/weather/forecast/', views.get_weather_forecast_api, name='weather_forecast_api'),
     path('api/weather/search/', views.search_locations_api, name='search_locations_api'),
+    path('api/temperature-alert/', views.temperature_alert_api, name='temperature_alert_api'),
 
     # User URLs
     path('dashboard/', views.user_dashboard, name='user_dashboard'),

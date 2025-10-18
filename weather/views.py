@@ -9,6 +9,7 @@ import json
 import logging
 from .services.chatbot_service import WeatherChatbotService
 from .services.weather_service import get_weather_service
+from .services.temperature_alert_service import TemperatureAlertService
 
 logger = logging.getLogger(__name__)
 
@@ -680,3 +681,69 @@ def get_weather_for_chatbot(city: str = None, lat: float = None, lon: float = No
             'success': False,
             'error': 'Weather service unavailable'
         }
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def temperature_alert_api(request):
+    """
+    API endpoint to get temperature alert with AI-generated recommendations
+
+    Expected JSON payload:
+    {
+        "temperature": 35,
+        "location": "Manila, Philippines",
+        "weather_condition": "Clear" // optional
+    }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'Authentication required'
+        }, status=401)
+
+    try:
+        data = json.loads(request.body)
+        temperature = data.get('temperature')
+        location = data.get('location', 'Unknown location')
+        weather_condition = data.get('weather_condition', None)
+
+        if temperature is None:
+            return JsonResponse({
+                'success': False,
+                'error': 'Temperature is required'
+            }, status=400)
+
+        # Initialize temperature alert service
+        alert_service = TemperatureAlertService()
+
+        # Get AI-generated recommendations
+        alert_data = alert_service.get_ai_recommendations(
+            temperature=float(temperature),
+            location=location,
+            weather_condition=weather_condition
+        )
+
+        if alert_data:
+            return JsonResponse({
+                'success': True,
+                'alert': alert_data
+            })
+        else:
+            # No alert needed (comfortable temperature)
+            return JsonResponse({
+                'success': True,
+                'alert': None,
+                'message': 'Temperature is comfortable, no alert needed'
+            })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Temperature alert API error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Internal server error'
+        }, status=500)

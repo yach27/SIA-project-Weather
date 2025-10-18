@@ -1,0 +1,63 @@
+<!-- Temperature Alert Dialog Component -->
+<div id="temperature-alert-dialog" class="fixed top-20 right-6 hidden transition-all duration-300" style="max-width: 380px; z-index: 9999;">
+    <div class="bg-white rounded-lg shadow-xl border-2 transform transition-all duration-300 scale-95" id="alert-dialog-content">
+        <!-- Dialog Header -->
+        <div id="alert-dialog-header" class="rounded-t-lg px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span id="alert-dialog-icon" class="text-2xl"></span>
+                <div>
+                    <h3 id="alert-dialog-title" class="font-bold text-sm"></h3>
+                </div>
+            </div>
+            <button onclick="closeTemperatureAlertDialog()" class="hover:opacity-75 transition-opacity focus:outline-none ml-2" title="Close">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Dialog Body -->
+        <div class="px-4 py-3 bg-gray-50 max-h-96 overflow-y-auto">
+            <div class="space-y-3">
+                <!-- Temperature Display -->
+                <div class="bg-white rounded-lg p-3 border-2 text-center" id="alert-temp-display">
+                    <div class="text-3xl font-bold" id="alert-temperature"></div>
+                    <div class="text-xs text-gray-600 mt-1" id="alert-location"></div>
+                </div>
+
+                <!-- Alert Message -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded" id="alert-message-box">
+                    <div class="flex items-start">
+                        <svg class="w-4 h-4 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-yellow-800 text-xs mb-1">Safety Advisory</h4>
+                            <p class="text-xs text-yellow-700" id="alert-message"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Recommendations -->
+                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                    <h4 class="font-semibold text-gray-900 text-xs mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Recommendations
+                    </h4>
+                    <ul class="space-y-1.5 text-xs text-gray-700" id="alert-recommendations">
+                        <!-- Recommendations will be inserted here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog Footer -->
+        <div class="px-4 py-3 bg-gray-100 rounded-b-lg flex justify-end">
+            <button onclick="closeTemperatureAlertDialog()" class="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-xs font-medium">
+                Got it
+            </button>
+        </div>
+    </div>
+</div>

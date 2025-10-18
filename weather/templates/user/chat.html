@@ -1,4 +1,5 @@
 {% extends "user/layouts/base.html" %}
+{% load static %}
 
 {% block title %}Weather Chat - ClimaChat{% endblock %}
 {% block page_title %}Weather Chat{% endblock %}
@@ -45,13 +46,15 @@
         </div>
 
         <div class="flex-1 flex min-h-0">
-            <div class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin" id="chat-messages">
-                <div class="text-center text-gray-500 py-8">
-                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                    </svg>
-                    <p>Start a conversation</p>
-                    <p class="text-xs">Ask about weather conditions, forecasts, or safety tips</p>
+            <div class="flex-1 flex flex-col">
+                <div class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin" id="chat-messages">
+                    <div class="text-center text-gray-500 py-8">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        <p>Start a conversation</p>
+                        <p class="text-xs">Ask about weather conditions, forecasts, or safety tips</p>
+                    </div>
                 </div>
             </div>
 
@@ -95,9 +98,15 @@
         </div>
     </div>
 </div>
+
+<!-- Include Temperature Alert Dialog Component -->
+{% include 'user/components/alerts/temperature_alert_dialog.html' %}
 {% endblock %}
 
 {% block extra_js %}
+<!-- Temperature Alert JavaScript -->
+<script src="{% static 'js/temperature_alert.js' %}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chatInput = document.getElementById('chat-input');
@@ -203,6 +212,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const tempValue = parseFloat(weatherData.temperature);
         const tempAlert = getTemperatureAlert(tempValue);
 
+        // Check and show temperature alert dialog if extreme
+        if (tempAlert.isExtreme) {
+            checkAndShowTemperatureAlert(tempValue, weatherData.location, weatherData.condition_main);
+        }
+
         const weatherHtml = `
             <div class="bg-white rounded-lg p-3 shadow-sm space-y-3">
                 <div class="flex items-center justify-between mb-2">
@@ -302,7 +316,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-red-600',
                 textColor: 'text-white',
                 icon: '🔥',
-                message: 'Extreme heat! Stay hydrated and avoid prolonged sun exposure.'
+                message: 'Extreme heat! Stay hydrated and avoid prolonged sun exposure.',
+                isExtreme: true
             };
         } else if (temp >= 30) {
             return {
@@ -310,7 +325,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-orange-500',
                 textColor: 'text-white',
                 icon: '☀️',
-                message: 'Hot weather. Stay cool and drink plenty of water.'
+                message: 'Hot weather. Stay cool and drink plenty of water.',
+                isExtreme: true
             };
         } else if (temp >= 25) {
             return {
@@ -318,7 +334,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-yellow-400',
                 textColor: 'text-gray-800',
                 icon: '🌤️',
-                message: 'Pleasant warm weather.'
+                message: 'Pleasant warm weather.',
+                isExtreme: false
             };
         } else if (temp >= 20) {
             return {
@@ -326,7 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-green-500',
                 textColor: 'text-white',
                 icon: '✨',
-                message: 'Comfortable temperature.'
+                message: 'Comfortable temperature.',
+                isExtreme: false
             };
         } else if (temp >= 15) {
             return {
@@ -334,7 +352,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-blue-400',
                 textColor: 'text-white',
                 icon: '🌬️',
-                message: 'Cool weather. Consider a light jacket.'
+                message: 'Cool weather. Consider a light jacket.',
+                isExtreme: false
             };
         } else if (temp >= 10) {
             return {
@@ -342,7 +361,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-blue-600',
                 textColor: 'text-white',
                 icon: '🧥',
-                message: 'Cold weather. Wear warm clothing.'
+                message: 'Cold weather. Wear warm clothing.',
+                isExtreme: true
             };
         } else if (temp >= 0) {
             return {
@@ -350,7 +370,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-indigo-700',
                 textColor: 'text-white',
                 icon: '❄️',
-                message: 'Very cold! Bundle up and stay warm.'
+                message: 'Very cold! Bundle up and stay warm.',
+                isExtreme: true
             };
         } else {
             return {
@@ -358,7 +379,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: 'bg-purple-900',
                 textColor: 'text-white',
                 icon: '🥶',
-                message: 'Freezing temperatures! Dress warmly and limit outdoor exposure.'
+                message: 'Freezing temperatures! Dress warmly and limit outdoor exposure.',
+                isExtreme: true
             };
         }
     }
