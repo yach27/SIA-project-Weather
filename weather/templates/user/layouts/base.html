@@ -80,6 +80,28 @@
 
         <!-- Main Content Area -->
         <main class="p-6">
+            <!-- Weather Alert Banner -->
+            <div id="weather-alert" class="hidden mb-6 rounded-lg p-4 shadow-lg border-l-4 transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                            <svg id="alert-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 id="alert-title" class="font-semibold text-sm"></h3>
+                            <p id="alert-message" class="text-sm mt-1"></p>
+                        </div>
+                    </div>
+                    <button onclick="dismissWeatherAlert()" class="flex-shrink-0 ml-4 text-current hover:opacity-75">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             {% block content %}
             {% endblock %}
         </main>
@@ -92,6 +114,9 @@
 {% block extra_js %}{% endblock %}
 
 <script>
+const OPENWEATHER_API_KEY = "{{ OPENWEATHER_API_KEY }}";
+console.log('OPENWEATHER_API_KEY loaded:', OPENWEATHER_API_KEY ? 'Yes (length: ' + OPENWEATHER_API_KEY.length + ')' : 'No');
+
 // Mobile menu functionality
 document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -105,7 +130,183 @@ document.addEventListener('DOMContentLoaded', function() {
 
     mobileMenuBtn.addEventListener('click', toggleMobileMenu);
     backdrop.addEventListener('click', toggleMobileMenu);
+
+    // Load weather alert on page load
+    loadWeatherAlert();
 });
+
+// Dismiss weather alert
+function dismissWeatherAlert() {
+    const alert = document.getElementById('weather-alert');
+    alert.classList.add('hidden');
+    // Don't store dismissal - alert will show again on next page/refresh
+    console.log('Alert dismissed (will show again on next page)');
+}
+
+// Load weather alert
+async function loadWeatherAlert() {
+    // Check if this page has disabled the base weather alert
+    if (window.disableBaseWeatherAlert === true) {
+        console.log('Base weather alert disabled on this page');
+        return;
+    }
+
+    console.log('Loading weather alert...');
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                console.log('Got user location:', lat, lon);
+                await fetchWeatherAndShowAlert(lat, lon);
+            },
+            function(error) {
+                console.error('Geolocation error:', error);
+                console.log('Using fallback location: Manila, Philippines');
+                // Fallback to Manila, Philippines
+                fetchWeatherAndShowAlert(14.5995, 120.9842);
+            },
+            {
+                timeout: 10000,
+                enableHighAccuracy: false
+            }
+        );
+    } else {
+        console.log('Geolocation not supported, using fallback');
+        fetchWeatherAndShowAlert(14.5995, 120.9842);
+    }
+}
+
+// Fetch weather and show alert
+async function fetchWeatherAndShowAlert(lat, lon) {
+    try {
+        console.log('Fetching weather data for alert...');
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`;
+        console.log('API URL:', url.replace(OPENWEATHER_API_KEY, 'API_KEY_HIDDEN'));
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        console.log('Weather data received:', data);
+
+        if (data && data.main) {
+            const temp = Math.round(data.main.temp);
+            const feelsLike = Math.round(data.main.feels_like);
+            const location = `${data.name}, ${data.sys.country}`;
+            const condition = data.weather[0].main;
+
+            console.log('Weather info:', { temp, feelsLike, location, condition });
+
+            // Update location in navbar
+            const locationElement = document.getElementById('current-location');
+            if (locationElement) {
+                locationElement.textContent = location;
+                console.log('Updated navbar location');
+            }
+
+            // Show weather alert
+            showWeatherAlert(temp, feelsLike, location, condition);
+        } else {
+            console.error('Invalid weather data structure:', data);
+        }
+    } catch (error) {
+        console.error('Error fetching weather for alert:', error);
+    }
+}
+
+// Show weather alert based on temperature
+function showWeatherAlert(temp, feelsLike, location, condition) {
+    console.log('showWeatherAlert called with:', { temp, feelsLike, location, condition });
+
+    const alert = document.getElementById('weather-alert');
+    const alertTitle = document.getElementById('alert-title');
+    const alertMessage = document.getElementById('alert-message');
+    const alertIcon = document.getElementById('alert-icon');
+
+    console.log('Alert elements found:', {
+        alert: !!alert,
+        alertTitle: !!alertTitle,
+        alertMessage: !!alertMessage,
+        alertIcon: !!alertIcon
+    });
+
+    if (!alert || !alertTitle || !alertMessage || !alertIcon) {
+        console.error('Weather alert elements not found in DOM');
+        return;
+    }
+
+    let title, message, bgColor, textColor, borderColor, iconSVG;
+
+    if (temp >= 35) {
+        // Extreme Hot
+        title = `🔥 Extreme Heat Alert in ${location}`;
+        message = `Current temperature is ${temp}°C (feels like ${feelsLike}°C). Stay indoors, drink plenty of water, and avoid strenuous activities.`;
+        bgColor = 'bg-red-50';
+        textColor = 'text-red-800';
+        borderColor = 'border-red-500';
+        iconSVG = `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>`;
+    } else if (temp >= 30) {
+        // Hot
+        title = `🌡️ Hot Weather in ${location}`;
+        message = `Temperature is ${temp}°C (feels like ${feelsLike}°C). Stay hydrated and use sun protection when outdoors.`;
+        bgColor = 'bg-orange-50';
+        textColor = 'text-orange-800';
+        borderColor = 'border-orange-500';
+        iconSVG = `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>`;
+    } else if (temp <= 10) {
+        // Cold
+        title = `❄️ Cold Weather in ${location}`;
+        message = `Temperature is ${temp}°C (feels like ${feelsLike}°C). Dress warmly in layers and protect yourself from the cold.`;
+        bgColor = 'bg-blue-50';
+        textColor = 'text-blue-800';
+        borderColor = 'border-blue-500';
+        iconSVG = `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>`;
+    } else if (temp <= 18) {
+        // Cool
+        title = `🍃 Cool Weather in ${location}`;
+        message = `Temperature is ${temp}°C (feels like ${feelsLike}°C). Consider wearing a light jacket when going outside.`;
+        bgColor = 'bg-cyan-50';
+        textColor = 'text-cyan-800';
+        borderColor = 'border-cyan-500';
+        iconSVG = `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>`;
+    } else {
+        // Normal/Pleasant
+        title = `✨ Pleasant Weather in ${location}`;
+        message = `Temperature is ${temp}°C (feels like ${feelsLike}°C). Perfect conditions for outdoor activities!`;
+        bgColor = 'bg-green-50';
+        textColor = 'text-green-800';
+        borderColor = 'border-green-500';
+        iconSVG = `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>`;
+    }
+
+    // Special conditions
+    if (condition === 'Rain' || condition === 'Thunderstorm') {
+        title = `🌧️ ${condition} Alert in ${location}`;
+        message = `${condition} detected with temperature ${temp}°C. Carry an umbrella and drive carefully.`;
+        bgColor = 'bg-indigo-50';
+        textColor = 'text-indigo-800';
+        borderColor = 'border-indigo-500';
+    } else if (condition === 'Snow') {
+        title = `🌨️ Snow Alert in ${location}`;
+        message = `Snow detected with temperature ${temp}°C. Exercise caution when traveling and dress warmly.`;
+        bgColor = 'bg-blue-50';
+        textColor = 'text-blue-800';
+        borderColor = 'border-blue-500';
+    }
+
+    // Update alert content
+    console.log('Setting alert content:', { title, message, bgColor, textColor, borderColor });
+    alertTitle.textContent = title;
+    alertMessage.textContent = message;
+    alert.className = `${bgColor} ${textColor} ${borderColor} mb-6 rounded-lg p-4 shadow-lg border-l-4 transition-all duration-300`;
+    alertIcon.innerHTML = iconSVG;
+
+    // Show alert
+    console.log('Removing hidden class from alert');
+    alert.classList.remove('hidden');
+    console.log('Alert should now be visible. Alert classes:', alert.className);
+}
 </script>
 </body>
 </html>

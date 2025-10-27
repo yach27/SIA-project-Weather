@@ -6,7 +6,7 @@ let map, currentMarker, weatherTileLayer = null;
 let alertMode = false, selectedLocation = null;
 
 // OpenWeatherMap API configuration
-const OPENWEATHER_API_KEY = "c58e8978703203f1a7ad55379a588e2c"; // Replace with your actual API key
+const OPENWEATHER_API_KEY = window.OPENWEATHER_API_KEY_FROM_ENV || "c58e8978703203f1a7ad55379a588e2c"; // Fallback to hardcoded if not set
 const OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 // Initialize map

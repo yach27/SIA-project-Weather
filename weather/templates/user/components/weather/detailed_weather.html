@@ -8,16 +8,16 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- UV Index -->
+        <!-- Current Location -->
         <div class="p-4 border border-gray-100 rounded-lg">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">UV Index</span>
-                <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                <span class="text-sm font-medium text-gray-600">Current Location</span>
+                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                 </svg>
             </div>
-            <p class="text-2xl font-bold text-gray-900">{{ uv_index|default:"--" }}</p>
-            <p class="text-sm text-gray-500">{{ uv_status|default:"Moderate" }}</p>
+            <p class="text-lg font-bold text-gray-900" data-weather="location">Detecting...</p>
+            <p class="text-sm text-gray-500" data-weather="condition">Loading...</p>
         </div>
 
         <!-- Visibility -->
@@ -29,8 +29,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                 </svg>
             </div>
-            <p class="text-2xl font-bold text-gray-900">{{ visibility|default:"--" }} km</p>
-            <p class="text-sm text-gray-500">{{ visibility_status|default:"Good" }}</p>
+            <p class="text-2xl font-bold text-gray-900">
+                <span data-weather="visibility">--</span> km
+            </p>
+            <p class="text-sm text-gray-500" data-weather="visibility-status">Loading...</p>
         </div>
 
         <!-- Pressure -->
@@ -41,10 +43,34 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                 </svg>
             </div>
-            <p class="text-2xl font-bold text-gray-900">{{ pressure|default:"--" }} hPa</p>
-            <p class="text-sm text-gray-500">{{ pressure_status|default:"Normal" }}</p>
+            <p class="text-2xl font-bold text-gray-900">
+                <span data-weather="pressure">--</span> hPa
+            </p>
+            <p class="text-sm text-gray-500" data-weather="pressure-status">Loading...</p>
         </div>
 
+        <!-- Sunrise -->
+        <div class="p-4 border border-gray-100 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Sunrise</span>
+                <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" data-weather="sunrise">--:--</p>
+            <p class="text-sm text-gray-500">Morning</p>
+        </div>
 
+        <!-- Sunset -->
+        <div class="p-4 border border-gray-100 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Sunset</span>
+                <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" data-weather="sunset">--:--</p>
+            <p class="text-sm text-gray-500">Evening</p>
+        </div>
     </div>
 </div>

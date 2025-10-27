@@ -3,7 +3,7 @@
 {% block title %}Health & Safety - ClimaChat{% endblock %}
 
 {% block page_title %}Health & Safety{% endblock %}
-{% block page_subtitle %}Weather-based health recommendations for your wellbeing{% endblock %}
+{% block page_subtitle %}AI-powered weather-based health recommendations for your wellbeing{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
@@ -16,4 +16,264 @@
     <!-- Safety Guidelines -->
     {% include 'user/components/health/safety_guidelines.html' %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// OPENWEATHER_API_KEY is already declared in base.html
+// Disable the base alert on this page since we have our own weather display
+window.disableBaseWeatherAlert = true;
+let weatherData = null;
+
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Fetch weather data and generate AI tips
+async function loadHealthTips() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                await fetchWeatherAndTips(lat, lon);
+            },
+            function(error) {
+                console.error('Geolocation error:', error);
+                // Fallback to Manila, Philippines
+                fetchWeatherAndTips(14.5995, 120.9842);
+            }
+        );
+    } else {
+        fetchWeatherAndTips(14.5995, 120.9842);
+    }
+}
+
+// Fetch weather data and generate tips
+async function fetchWeatherAndTips(lat, lon) {
+    try {
+        // Fetch weather data
+        const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`);
+        const data = await weatherResponse.json();
+
+        if (data && data.main) {
+            weatherData = {
+                temperature: Math.round(data.main.temp),
+                feels_like: Math.round(data.main.feels_like),
+                condition: data.weather[0].description,
+                condition_main: data.weather[0].main,
+                humidity: data.main.humidity,
+                wind_speed: Math.round(data.wind.speed * 3.6),
+                pressure: data.main.pressure
+            };
+
+            // Update location display
+            const locationName = `${data.name}, ${data.sys.country}`;
+            const locationElement = document.querySelector('[data-user-location]');
+            if (locationElement) {
+                locationElement.textContent = locationName;
+            }
+
+            // Fetch air quality
+            const airResponse = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`);
+            const airData = await airResponse.json();
+
+            if (airData && airData.list && airData.list.length > 0) {
+                weatherData.air_quality = airData.list[0].main.aqi;
+            } else {
+                weatherData.air_quality = 1;
+            }
+
+            // Generate AI health tips
+            await generateHealthTips(weatherData);
+
+            // Generate AI safety guidelines
+            await generateSafetyGuidelines(weatherData);
+        }
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+    }
+}
+
+// Generate AI health tips
+async function generateHealthTips(weather) {
+    try {
+        const response = await fetch('/api/health-tips/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(weather)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.tips) {
+                displayHealthTips(data.tips);
+            }
+        }
+    } catch (error) {
+        console.error('Error generating health tips:', error);
+    }
+}
+
+// Display health tips
+function displayHealthTips(tips) {
+    const container = document.querySelector('[data-tips-container]');
+    if (!container) return;
+
+    const categoryIcons = {
+        'temperature': 'text-red-600 bg-red-100',
+        'humidity': 'text-blue-600 bg-blue-100',
+        'uv': 'text-yellow-600 bg-yellow-100',
+        'air': 'text-purple-600 bg-purple-100',
+        'general': 'text-green-600 bg-green-100'
+    };
+
+    const html = tips.map(tip => {
+        const colorClass = categoryIcons[tip.category] || categoryIcons['general'];
+        return `
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 ${colorClass} rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">${tip.title}</h3>
+                        <p class="text-gray-600">${tip.description}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+// Generate AI safety guidelines
+async function generateSafetyGuidelines(weather) {
+    const container = document.querySelector('[data-safety-container]');
+    if (!container) return;
+
+    const prompt = `Based on current weather (${weather.temperature}°C, ${weather.condition}, humidity ${weather.humidity}%, wind ${weather.wind_speed} km/h), generate 4-6 specific safety guidelines. Keep each guideline under 100 characters.`;
+
+    const guidelines = getSafetyGuidelines(weather);
+    displaySafetyGuidelines(guidelines);
+}
+
+// Get weather-based safety guidelines
+function getSafetyGuidelines(weather) {
+    const guidelines = [];
+
+    if (weather.temperature > 32) {
+        guidelines.push({
+            color: 'red',
+            text: 'Avoid prolonged outdoor exposure. Seek air-conditioned spaces during peak hours.',
+            icon: 'temperature'
+        });
+        guidelines.push({
+            color: 'orange',
+            text: 'Drink water frequently (every 15-20 minutes) even if not thirsty.',
+            icon: 'water'
+        });
+    } else if (weather.temperature < 15) {
+        guidelines.push({
+            color: 'blue',
+            text: 'Dress in layers and protect extremities from cold exposure.',
+            icon: 'cold'
+        });
+    }
+
+    if (weather.humidity > 75) {
+        guidelines.push({
+            color: 'blue',
+            text: 'High humidity may affect breathing. Take breaks if doing physical activities.',
+            icon: 'humidity'
+        });
+    }
+
+    if (weather.wind_speed > 40) {
+        guidelines.push({
+            color: 'yellow',
+            text: 'Secure loose objects outdoors. Avoid areas with potential falling debris.',
+            icon: 'wind'
+        });
+    }
+
+    if (weather.air_quality >= 3) {
+        guidelines.push({
+            color: 'purple',
+            text: 'Poor air quality detected. Limit outdoor activities and wear a mask if necessary.',
+            icon: 'air'
+        });
+    }
+
+    if (weather.condition_main === 'Rain' || weather.condition_main === 'Thunderstorm') {
+        guidelines.push({
+            color: 'indigo',
+            text: 'Stay indoors during thunderstorms. Avoid electrical appliances and plumbing.',
+            icon: 'storm'
+        });
+    }
+
+    // Add general guidelines
+    guidelines.push({
+        color: 'green',
+        text: 'Keep emergency supplies ready: flashlight, batteries, first aid kit, and water.',
+        icon: 'emergency'
+    });
+
+    return guidelines;
+}
+
+// Display safety guidelines
+function displaySafetyGuidelines(guidelines) {
+    const container = document.querySelector('[data-safety-container]');
+    if (!container) return;
+
+    const colorClasses = {
+        'red': 'bg-red-50 border-red-200 text-red-800',
+        'orange': 'bg-orange-50 border-orange-200 text-orange-800',
+        'blue': 'bg-blue-50 border-blue-200 text-blue-800',
+        'yellow': 'bg-yellow-50 border-yellow-200 text-yellow-800',
+        'purple': 'bg-purple-50 border-purple-200 text-purple-800',
+        'indigo': 'bg-indigo-50 border-indigo-200 text-indigo-800',
+        'green': 'bg-green-50 border-green-200 text-green-800'
+    };
+
+    const html = guidelines.map(guideline => {
+        const colorClass = colorClasses[guideline.color] || colorClasses['green'];
+        return `
+            <div class="${colorClass} border rounded-lg p-4">
+                <div class="flex items-start">
+                    <span class="w-1.5 h-1.5 bg-current rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                    <p class="text-sm font-medium">${guideline.text}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+// Load tips when page loads
+document.addEventListener('DOMContentLoaded', loadHealthTips);
+</script>
 {% endblock %}

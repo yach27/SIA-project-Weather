@@ -10,6 +10,7 @@ import logging
 from .services.chatbot_service import WeatherChatbotService
 from .services.weather_service import get_weather_service
 from .services.temperature_alert_service import TemperatureAlertService
+from .services.health_tips_service import HealthTipsService
 
 logger = logging.getLogger(__name__)
 
@@ -242,30 +243,32 @@ def user_dashboard(request):
     if not request.user.is_authenticated:
         return redirect('signin')
 
+    # Default context with placeholder data
+    # Real data will be loaded via JavaScript using geolocation
     context = {
-        'current_temp': 25,  # Replace with actual weather API data
-        'feels_like': 28,
-        'humidity': 65,
-        'humidity_status': 'Normal',
-        'wind_speed': 12,
-        'wind_direction': 'NW',
-        'air_quality': 42,
-        'air_quality_status': 'Good',
-        'uv_index': 6,
-        'uv_status': 'High',
-        'visibility': 10,
-        'visibility_status': 'Good',
-        'pressure': 1013,
-        'pressure_status': 'Normal',
-        'sunrise': '06:45',
-        'sunset': '18:30',
-        'moon_phase': 75,
-        'moon_phase_name': 'Waxing Gibbous',
-        'current_condition': 'Partly Cloudy',
-        'current_location': 'New York, NY',
-        'active_alerts': [],  # Add actual alerts here
-        'forecast_data': [],  # Add 7-day forecast data
-        'health_tips': [],  # Add weather-based health tips
+        'current_temp': None,
+        'feels_like': None,
+        'humidity': None,
+        'humidity_status': 'Loading...',
+        'wind_speed': None,
+        'wind_direction': 'Loading...',
+        'air_quality': None,
+        'air_quality_status': 'Loading...',
+        'uv_index': None,
+        'uv_status': 'Loading...',
+        'visibility': None,
+        'visibility_status': 'Loading...',
+        'pressure': None,
+        'pressure_status': 'Loading...',
+        'sunrise': '--:--',
+        'sunset': '--:--',
+        'moon_phase': 0,
+        'moon_phase_name': 'Loading...',
+        'current_condition': 'Loading...',
+        'current_location': 'Detecting location...',
+        'active_alerts': [],
+        'forecast_data': [],
+        'health_tips': [],
     }
     return render(request, 'user/dashboard.html', context)
 
@@ -312,62 +315,11 @@ def weather_history(request):
     return render(request, 'user/weather_history.html', context)
 
 def health_tips(request):
-    """Health and safety tips based on weather"""
+    """Health and safety tips based on weather - AI-generated"""
     if not request.user.is_authenticated:
         return redirect('signin')
 
-    # Sample health tips data
-    sample_tips = [
-        {
-            'title': 'Sun Protection',
-            'description': 'UV index is high today. Wear sunscreen with SPF 30+ and protective clothing when outdoors.',
-            'category': 'uv'
-        },
-        {
-            'title': 'Stay Hydrated',
-            'description': 'High temperatures and humidity levels require increased water intake. Drink fluids regularly.',
-            'category': 'temperature'
-        },
-        {
-            'title': 'Respiratory Care',
-            'description': 'Humidity levels are moderate. Those with asthma should carry inhalers as a precaution.',
-            'category': 'humidity'
-        },
-        {
-            'title': 'Air Quality Alert',
-            'description': 'Air quality is good today. Perfect conditions for outdoor activities and exercise.',
-            'category': 'air'
-        },
-    ]
-
-    # Sample default tips for template fallback
-    default_tips = {
-        'uv_tip': {
-            'title': 'UV Protection',
-            'description': 'Wear sunscreen with SPF 30+ when UV index is high (above 6).',
-            'category': 'uv'
-        },
-        'hydration_tip': {
-            'title': 'Stay Hydrated',
-            'description': 'Drink plenty of water, especially during hot and humid weather.',
-            'category': 'humidity'
-        },
-        'clothing_tip': {
-            'title': 'Dress Appropriately',
-            'description': 'Layer clothing for changing temperatures and carry an umbrella if rain is expected.',
-            'category': 'temperature'
-        },
-        'air_quality_tip': {
-            'title': 'Air Quality',
-            'description': 'Limit outdoor activities when air quality index is poor (above 150).',
-            'category': 'air'
-        }
-    }
-
-    context = {
-        'health_tips': sample_tips,
-        **default_tips  # Spread the default tips for template access
-    }
+    context = {}
     return render(request, 'user/health_tips.html', context)
 
 def weather_alerts(request):
@@ -743,6 +695,54 @@ def temperature_alert_api(request):
         }, status=400)
     except Exception as e:
         logger.error(f"Temperature alert API error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Internal server error'
+        }, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def health_tips_api(request):
+    """
+    API endpoint to get AI-generated health tips based on weather data
+
+    Expected JSON payload:
+    {
+        "temperature": 30,
+        "feels_like": 33,
+        "condition": "Sunny",
+        "humidity": 65,
+        "wind_speed": 12,
+        "air_quality": 1
+    }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'Authentication required'
+        }, status=401)
+
+    try:
+        weather_data = json.loads(request.body)
+
+        # Initialize health tips service
+        tips_service = HealthTipsService()
+
+        # Generate health tips
+        tips = tips_service.generate_health_tips(weather_data)
+
+        return JsonResponse({
+            'success': True,
+            'tips': tips
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Health tips API error: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': 'Internal server error'

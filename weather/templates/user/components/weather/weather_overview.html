@@ -5,8 +5,12 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Temperature</p>
-                <p class="text-3xl font-bold text-gray-900">{{ current_temp|default:"--" }}°C</p>
-                <p class="text-sm text-gray-500">Feels like {{ feels_like|default:"--" }}°C</p>
+                <p class="text-3xl font-bold text-gray-900">
+                    <span data-weather="temperature">--</span>°C
+                </p>
+                <p class="text-sm text-gray-500">
+                    Feels like <span data-weather="feels-like">--</span>°C
+                </p>
             </div>
             <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
@@ -21,8 +25,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Humidity</p>
-                <p class="text-3xl font-bold text-gray-900">{{ humidity|default:"--" }}%</p>
-                <p class="text-sm text-gray-500">{{ humidity_status|default:"Normal" }}</p>
+                <p class="text-3xl font-bold text-gray-900">
+                    <span data-weather="humidity">--</span>%
+                </p>
+                <p class="text-sm text-gray-500" data-weather="humidity-status">Loading...</p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -37,8 +43,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Wind Speed</p>
-                <p class="text-3xl font-bold text-gray-900">{{ wind_speed|default:"--" }}<span class="text-lg"> m/s</span></p>
-                <p class="text-sm text-gray-500">{{ wind_direction|default:"--" }}</p>
+                <p class="text-3xl font-bold text-gray-900">
+                    <span data-weather="wind-speed">--</span><span class="text-lg"> km/h</span>
+                </p>
+                <p class="text-sm text-gray-500" data-weather="wind-direction">Loading...</p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,8 +61,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Air Quality</p>
-                <p class="text-3xl font-bold text-gray-900">{{ air_quality|default:"--" }}</p>
-                <p class="text-sm text-gray-500">{{ air_quality_status|default:"Moderate" }}</p>
+                <p class="text-3xl font-bold text-gray-900">
+                    <span data-weather="air-quality">--</span>
+                </p>
+                <p class="text-sm text-gray-500" data-weather="air-quality-status">Loading...</p>
             </div>
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,135 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClimaChat - Weather Chatbot</title>
-    {% load static %}
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'weather/css/animations.css' %}">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'fredoka': ['Fredoka One', 'cursive'],
-                        'nunito': ['Nunito', 'sans-serif'],
-                    },
-                    animation: {
-                        'float': 'float 4s ease-in-out infinite',
-                        'float-reverse': 'float 3s ease-in-out infinite reverse',
-                        'float-slow': 'float 5s ease-in-out infinite',
-                        'float-slower': 'float 6s ease-in-out infinite',
-                        'float-fast': 'float 2.5s ease-in-out infinite',
-                        'cloud-drift': 'cloudDrift 8s ease-in-out infinite alternate',
-                        'thunder-rumble': 'thunderRumble 0.3s ease-in-out',
-                        'lightning': 'lightning 2s ease-in-out infinite',
-                        'lightning-bolt': 'lightningBolt 0.3s ease-out',
-                        'rain': 'rain 1s linear infinite',
-                        'rain-wind': 'rainWind 0.8s linear infinite',
-                        'shine': 'shine 0.5s ease-out',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @keyframes sunRotate {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            100% { transform: translateX(-50%) rotate(360deg); }
+        body {
+            font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
-<body class="font-nunito min-h-screen flex items-center justify-center overflow-hidden relative" style="background: linear-gradient(135deg, #2B5797 0%, #1E3A5F 50%, #1A2B42 100%);">
-    <!-- Background Weather Elements -->
-    <div class="weather-background absolute inset-0 pointer-events-none z-0">
-        <!-- Sun -->
-        <div class="absolute top-8 left-1/2 transform -translate-x-1/2 w-48 h-48 z-10" style="animation: sunRotate 20s linear infinite;">
-            <img src="{% static 'weather/images/sun.png' %}" alt="Sun" class="w-full h-full object-contain drop-shadow-lg">
-        </div>
+<body class="min-h-screen bg-gradient-to-br from-sky-500 to-cyan-500 overflow-x-hidden">
+    <!-- Hero Section -->
+    <div class="min-h-screen flex items-center justify-center px-4 py-12 relative">
+        <!-- Decorative Background Elements -->
+        <div class="absolute w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -top-48 -right-48"></div>
+        <div class="absolute w-80 h-80 bg-white opacity-5 rounded-full blur-3xl -bottom-32 -left-32"></div>
 
-        <!-- Cloud Images -->
-        <!-- Cloud 1 - Close Left of Sun -->
-        <div class="absolute top-12 left-1/2 transform -translate-x-full -translate-x-8 w-80 h-52 opacity-80" style="animation: cloud-drift-realistic 15s ease-in-out infinite;">
-            <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
-        </div>
+        <!-- Main Content -->
+        <div class="max-w-7xl w-full grid lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
+            <!-- Left Section -->
+            <div class="text-center lg:text-left">
+                <!-- Badge -->
+                <div class="inline-block mb-6">
+                    <span class="bg-white/20 text-white px-6 py-2 rounded-full text-sm font-semibold backdrop-blur-md">
+                        AI-Powered Weather Assistant
+                    </span>
+                </div>
 
-        <!-- Cloud 2 - Close Right of Sun -->
-        <div class="absolute top-12 left-1/2 transform translate-x-8 w-88 h-56 opacity-75" style="animation: cloud-drift-realistic 18s ease-in-out infinite reverse;">
-            <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
-        </div>
+                <!-- Title -->
+                <h1 class="text-6xl md:text-7xl lg:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+                    CLIMACHAT
+                </h1>
 
-        <!-- Cloud 5 - Middle Left Background -->
-        <div class="absolute top-1/2 left-8 transform -translate-y-1/2 w-72 h-48 opacity-60" style="animation: cloud-drift-realistic 28s ease-in-out infinite;">
-            <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
-        </div>
+                <!-- Subtitle -->
+                <p class="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                    Get instant weather updates, personalized safety tips, and real-time alerts — all in one conversation
+                </p>
 
-        <!-- Cloud 6 - Middle Right Background -->
-        <div class="absolute top-1/2 right-8 transform -translate-y-1/2 w-76 h-50 opacity-65" style="animation: cloud-drift-realistic 24s ease-in-out infinite reverse;">
-            <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
-        </div>
-
-        <!-- Cloud 7 - Bottom Left -->
-        <div class="absolute bottom-16 left-24 w-68 h-44 opacity-55" style="animation: cloud-drift-realistic 32s ease-in-out infinite;">
-            <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
-        </div>
-
-        <!-- Cloud 8 - Bottom Right -->
-        <div class="absolute bottom-20 right-28 w-80 h-52 opacity-70" style="animation: cloud-drift-realistic 26s ease-in-out infinite reverse;">
-            <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="text-center z-10 relative max-w-4xl px-10">
-        <!-- Title with side clouds -->
-        <div class="relative">
-            <!-- Left side cloud -->
-            <div class="absolute -left-32 top-1/2 transform -translate-y-1/2 w-24 h-16 opacity-60" style="animation: cloud-drift-realistic 20s ease-in-out infinite;">
-                <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="/signup/" class="bg-white text-sky-500 px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all">
+                        Sign Me Up
+                    </a>
+                    <a href="/signin/" class="bg-transparent text-white px-8 py-4 rounded-xl font-bold text-lg border-2 border-white hover:bg-white/10 hover:-translate-y-1 transition-all">
+                        Sign Me In
+                    </a>
+                </div>
             </div>
 
-            <!-- Right side cloud -->
-            <div class="absolute -right-32 top-1/2 transform -translate-y-1/2 w-28 h-18 opacity-65" style="animation: cloud-drift-realistic 18s ease-in-out infinite reverse;">
-                <img src="{% static 'weather/images/clouds1.png' %}" alt="Cloud" class="w-full h-full object-contain">
+            <!-- Right Section - Feature Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto lg:mx-0">
+                <!-- Card 1 -->
+                <div class="bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl p-8 hover:bg-white/30 hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer">
+                    <div class="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center mb-6 text-4xl">
+                        ⚡
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Real-Time Updates</h3>
+                    <p class="text-white/90 text-base leading-relaxed">Get instant weather alerts and forecasts</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl p-8 hover:bg-white/30 hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer">
+                    <div class="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center mb-6 text-4xl">
+                        🤖
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">AI Assistant</h3>
+                    <p class="text-white/90 text-base leading-relaxed">Smart chatbot understands your needs</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl p-8 hover:bg-white/30 hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer">
+                    <div class="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center mb-6 text-4xl">
+                        🛡️
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Safety Tips</h3>
+                    <p class="text-white/90 text-base leading-relaxed">Personalized recommendations for any weather</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl p-8 hover:bg-white/30 hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer">
+                    <div class="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 rounded-2xl flex items-center justify-center mb-6 text-4xl">
+                        🌍
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-3">Global Coverage</h3>
+                    <p class="text-white/90 text-base leading-relaxed">Weather data from anywhere in the world</p>
+                </div>
             </div>
-
-            <h1 class="font-fredoka text-6xl md:text-8xl mb-8 tracking-wider drop-shadow-2xl" style="
-                background: linear-gradient(45deg, #00D4FF 0%, #87CEEB 25%, #E0F6FF 50%, #87CEEB 75%, #00D4FF 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                text-shadow:
-                    3px 3px 0px rgba(0, 150, 200, 0.8),
-                    6px 6px 0px rgba(0, 120, 180, 0.6),
-                    9px 9px 0px rgba(0, 100, 160, 0.4),
-                    12px 12px 20px rgba(0, 80, 140, 0.3);
-                filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
-                transform: perspective(500px) rotateX(15deg);
-            ">
-                CLIMACHAT
-            </h1>
-        </div>
-
-        <!-- Subtitle -->
-        <p class="text-lg md:text-xl text-gray-900 font-bold mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
-            GET INSTANT WEATHER UPDATES, PERSONALIZED SAFETY TIPS<br class="hidden md:block">
-            AND REAL-TIME ALERTS - ALL IN ONE CONVERSATION
-        </p>
-
-        <!-- Buttons -->
-        <div class="flex flex-col md:flex-row gap-8 justify-center items-center">
-            <a href="{% url 'signup' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-12 py-4 text-2xl font-extrabold rounded-full uppercase tracking-wide shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border-2 border-blue-400">
-                SIGN ME UP!
-            </a>
-            <a href="{% url 'signin' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-12 py-4 text-2xl font-extrabold rounded-full uppercase tracking-wide shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl border-2 border-blue-400">
-                SIGN ME IN!
-            </a>
         </div>
     </div>
-
-    <!-- Load JavaScript -->
-    <script src="{% static 'weather/js/simple-clouds.js' %}"></script>
-    <script src="{% static 'weather/js/simple-rain.js' %}"></script>
-    <script src="{% static 'weather/js/realistic-rain.js' %}"></script>
-    <script src="{% static 'weather/js/weather-animations.js' %}"></script>
 </body>
 </html>

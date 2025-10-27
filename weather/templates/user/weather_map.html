@@ -19,5 +19,9 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Set API key from Django settings before loading weather_map.js
+window.OPENWEATHER_API_KEY_FROM_ENV = "{{ OPENWEATHER_API_KEY }}";
+</script>
 <script src="{% load static %}{% static 'js/weather_map.js' %}"></script>
 {% endblock %}

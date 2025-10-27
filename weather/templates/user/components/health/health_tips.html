@@ -2,10 +2,15 @@
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-900">Health & Safety Tips</h2>
-        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Weather-Based</span>
+        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">AI-Powered</span>
     </div>
 
-    <div class="space-y-4">
+    <div class="space-y-4 health-tips-container">
+        <!-- Loading indicator -->
+        <div class="flex items-center justify-center py-8 text-gray-500">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
+            <span class="text-sm">Generating personalized health tips...</span>
+        </div>
         {% if health_tips %}
             {% for tip in health_tips %}
                 <div class="p-3 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
