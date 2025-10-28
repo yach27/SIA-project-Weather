@@ -121,12 +121,26 @@ function showTemperatureAlertDialog(alertData) {
 
 /**
  * Close temperature alert dialog
+ * Uses Django backend to dismiss alert via session
  */
-function closeTemperatureAlertDialog() {
+async function closeTemperatureAlertDialog() {
     const dialog = document.getElementById('temperature-alert-dialog');
     const dialogContent = document.getElementById('alert-dialog-content');
 
     if (!dialog || !dialogContent) return;
+
+    // Call Django API to dismiss alert (sets session flag)
+    try {
+        await fetch('/api/dismiss-alert/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        console.log('Alert dismissed via Django session');
+    } catch (error) {
+        console.error('Error dismissing alert:', error);
+    }
 
     // Hide with animation
     dialog.classList.remove('opacity-100');
@@ -139,12 +153,15 @@ function closeTemperatureAlertDialog() {
 }
 
 /**
- * Check temperature and show alert if needed
+ * Check temperature and show alert if needed (Django session handles "show once")
  * @param {number} temperature - Temperature in Celsius
  * @param {string} location - Location name
  * @param {string} weatherCondition - Weather condition (optional)
  */
 async function checkAndShowTemperatureAlert(temperature, location, weatherCondition = null) {
+    // Django session now handles whether alert should show
+    // No need for sessionStorage - backend manages this
+
     const alertData = await fetchTemperatureAlert(temperature, location, weatherCondition);
     if (alertData) {
         showTemperatureAlertDialog(alertData);

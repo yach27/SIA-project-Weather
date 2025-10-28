@@ -1,5 +1,16 @@
 from django.urls import path
 from . import views
+from .views import (
+    ChatbotAPIView,
+    HealthTipsAPIView,
+    WeatherDataAPIView,
+    LocationSearchAPIView,
+    DismissAlertAPIView,
+    CurrentWeatherAPIView,
+    WeatherForecastAPIView,
+    SearchLocationsAPIView,
+    TemperatureAlertAPIView,
+)
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -12,14 +23,17 @@ urlpatterns = [
     path('admin-alerts/', views.admin_weather_alerts, name='admin_weather_alerts'),
     path('admin-map/', views.admin_weather_map, name='admin_weather_map'),
     path('admin-users/', views.admin_users, name='admin_users'),
-    path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
 
-    # Weather API endpoints
-    path('api/weather/current/', views.get_current_weather_api, name='current_weather_api'),
-    path('api/weather/forecast/', views.get_weather_forecast_api, name='weather_forecast_api'),
-    path('api/weather/search/', views.search_locations_api, name='search_locations_api'),
-    path('api/temperature-alert/', views.temperature_alert_api, name='temperature_alert_api'),
-    path('api/health-tips/', views.health_tips_api, name='health_tips_api'),
+    # API URLs - Using Class-Based Views (Django Best Practice)
+    path('api/chatbot/', ChatbotAPIView.as_view(), name='chatbot_api'),
+    path('api/health-tips/', HealthTipsAPIView.as_view(), name='health_tips_api'),
+    path('api/weather/', WeatherDataAPIView.as_view(), name='weather_data_api'),
+    path('api/location/search/', LocationSearchAPIView.as_view(), name='location_search_api'),
+    path('api/dismiss-alert/', DismissAlertAPIView.as_view(), name='dismiss_alert_api'),
+    path('api/weather/current/', CurrentWeatherAPIView.as_view(), name='current_weather_api'),
+    path('api/weather/forecast/', WeatherForecastAPIView.as_view(), name='weather_forecast_api'),
+    path('api/weather/search/', SearchLocationsAPIView.as_view(), name='search_locations_api'),
+    path('api/temperature-alert/', TemperatureAlertAPIView.as_view(), name='temperature_alert_api'),
 
     # User URLs
     path('dashboard/', views.user_dashboard, name='user_dashboard'),

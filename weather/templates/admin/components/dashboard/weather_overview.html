@@ -1,44 +1,60 @@
+{% load static %}
 <!-- Weather Data Overview Component -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-semibold text-gray-900">Weather Data Overview</h2>
+        <h2 class="text-xl font-semibold text-gray-900">Current Weather</h2>
         <a href="{% url 'admin_chat' %}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
             Test Chatbot →
         </a>
     </div>
-    <div class="grid grid-cols-1 gap-4">
-        <div class="text-center p-4 bg-gray-50 rounded-lg">
-            <p class="text-2xl font-bold text-gray-900">25°C</p>
-            <p class="text-sm text-gray-600">Global Average</p>
-            <p class="text-xs text-green-600 mt-1">↑ 2°C from yesterday</p>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                <p class="text-lg font-bold text-gray-900">65%</p>
-                <p class="text-xs text-gray-600">Avg Humidity</p>
-            </div>
-            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                <p class="text-lg font-bold text-gray-900">12 m/s</p>
-                <p class="text-xs text-gray-600">Avg Wind</p>
-            </div>
-        </div>
+
+    <!-- Loading State -->
+    <div id="admin-weather-loading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+        <p class="text-sm text-gray-500">Loading weather data...</p>
     </div>
 
-    <div class="mt-6 pt-4 border-t border-gray-200">
-        <h3 class="text-sm font-medium text-gray-900 mb-3">Weather by Region</h3>
-        <div class="space-y-2">
-            <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-600">North America</span>
-                <span class="font-medium text-gray-900">22°C avg</span>
+    <!-- Weather Data -->
+    <div id="admin-weather-data" class="hidden">
+        <div class="grid grid-cols-1 gap-4">
+            <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                <p class="text-2xl font-bold text-gray-900"><span id="admin-temp">--</span>°C</p>
+                <p class="text-sm text-gray-600" id="admin-location">Detecting location...</p>
+                <p class="text-xs text-gray-500 mt-1 capitalize" id="admin-condition">--</p>
             </div>
-            <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-600">Asia Pacific</span>
-                <span class="font-medium text-gray-900">28°C avg</span>
-            </div>
-            <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-600">Europe</span>
-                <span class="font-medium text-gray-900">19°C avg</span>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-lg font-bold text-gray-900"><span id="admin-humidity">--</span>%</p>
+                    <p class="text-xs text-gray-600">Humidity</p>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-lg font-bold text-gray-900"><span id="admin-wind">--</span> km/h</p>
+                    <p class="text-xs text-gray-600">Wind Speed</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="{% static 'js/weather_utils.js' %}"></script>
+<script>
+// Load admin weather data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    getUserLocation(async (lat, lon) => {
+        const weatherData = await fetchWeatherData(lat, lon, '{{ OPENWEATHER_API_KEY }}');
+
+        if (weatherData) {
+            // Update UI
+            document.getElementById('admin-temp').textContent = weatherData.temperature;
+            document.getElementById('admin-location').textContent = weatherData.location;
+            document.getElementById('admin-condition').textContent = weatherData.condition;
+            document.getElementById('admin-humidity').textContent = weatherData.humidity;
+            document.getElementById('admin-wind').textContent = weatherData.wind_speed;
+
+            // Show data, hide loading
+            document.getElementById('admin-weather-loading').classList.add('hidden');
+            document.getElementById('admin-weather-data').classList.remove('hidden');
+        }
+    });
+});
+</script>

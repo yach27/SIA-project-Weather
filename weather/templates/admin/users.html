@@ -14,7 +14,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-blue-100 text-sm">Total Users</p>
-                    <p class="text-3xl font-bold">1,247</p>
+                    <p class="text-3xl font-bold">{{ total_users }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -28,8 +28,8 @@
         <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-green-100 text-sm">Active Today</p>
-                    <p class="text-3xl font-bold">892</p>
+                    <p class="text-green-100 text-sm">Active Users</p>
+                    <p class="text-3xl font-bold">{{ active_users }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -44,7 +44,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-purple-100 text-sm">New Today</p>
-                    <p class="text-3xl font-bold">23</p>
+                    <p class="text-3xl font-bold">{{ new_today }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -59,7 +59,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-red-100 text-sm">Inactive</p>
-                    <p class="text-3xl font-bold">155</p>
+                    <p class="text-3xl font-bold">{{ inactive_users }}</p>
                 </div>
                 <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -112,7 +112,7 @@
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900">Users List</h3>
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-500">Showing <span id="showing-count">25</span> of <span id="total-count">1,247</span></span>
+                    <span class="text-sm text-gray-500">Showing <span id="showing-count">{{ users|length }}</span> of <span id="total-count">{{ total_users }}</span></span>
                     <button id="refresh-users" class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -138,7 +138,70 @@
                     </tr>
                 </thead>
                 <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
-                    <!-- Users will be populated here by JavaScript -->
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold mr-3">
+                                    {{ user.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ user.username }}</p>
+                                    <p class="text-sm text-gray-500">{{ user.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.is_active %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                            {% else %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">User</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            --
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {% if user.last_login %}
+                            {{ user.last_login|timesince }} ago
+                            {% else %}
+                            Never
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="p-1 text-blue-600 hover:text-blue-800" title="View Details">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button class="p-1 text-gray-600 hover:text-gray-800" title="Edit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <button class="p-1 text-red-600 hover:text-red-800" title="Delete">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            No users found
+                        </td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -197,5 +260,48 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% load static %}{% static 'js/admin_users.js' %}"></script>
+<!-- JavaScript removed - using Django backend for user management -->
+<script>
+// Simple search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('user-search');
+    const statusFilter = document.getElementById('status-filter');
+    const roleFilter = document.getElementById('role-filter');
+    const tableRows = document.querySelectorAll('#users-table-body tr');
+
+    function filterUsers() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const roleValue = roleFilter.value;
+
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const matchesSearch = text.includes(searchTerm);
+            const statusBadge = row.querySelector('td:nth-child(3) span');
+            const roleBadge = row.querySelector('td:nth-child(4) span');
+
+            const matchesStatus = statusValue === 'all' ||
+                (statusBadge && statusBadge.textContent.toLowerCase().includes(statusValue));
+            const matchesRole = roleValue === 'all' ||
+                (roleBadge && roleBadge.textContent.toLowerCase().includes(roleValue));
+
+            row.style.display = (matchesSearch && matchesStatus && matchesRole) ? '' : 'none';
+        });
+
+        // Update showing count
+        const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+        document.getElementById('showing-count').textContent = visibleRows.length;
+    }
+
+    if (searchInput) searchInput.addEventListener('input', filterUsers);
+    if (statusFilter) statusFilter.addEventListener('change', filterUsers);
+    if (roleFilter) roleFilter.addEventListener('change', filterUsers);
+
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-users');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => location.reload());
+    }
+});
+</script>
 {% endblock %}

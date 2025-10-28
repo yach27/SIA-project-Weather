@@ -64,6 +64,7 @@ Keep responses conversational but informative."""
         try:
             # If current weather data is provided (from map), use it directly for general queries
             weather_info = None
+            detected_location = None
             if current_weather_data:
                 # Format the weather data
                 weather_info = (
@@ -77,7 +78,12 @@ Keep responses conversational but informative."""
                 )
             else:
                 # Check if this is a weather query and get real weather data
-                weather_info = self._check_weather_query(user_message, user_location)
+                weather_result = self._check_weather_query(user_message, user_location)
+                if isinstance(weather_result, dict):
+                    weather_info = weather_result.get('weather_info')
+                    detected_location = weather_result.get('location')
+                else:
+                    weather_info = weather_result
 
             # Build messages array
             messages = [
@@ -122,7 +128,8 @@ Keep responses conversational but informative."""
                     'response': bot_response,
                     'usage': data.get('usage', {}),
                     'model': data.get('model', self.model),
-                    'weather_data': weather_info is not None
+                    'weather_data': weather_info is not None,
+                    'detected_location': detected_location
                 }
             else:
                 error_msg = f"API request failed with status {response.status_code}"
@@ -285,7 +292,7 @@ Keep responses conversational but informative."""
         else:
             return "I'm ClimaChat, your weather assistant! I'm currently experiencing some technical difficulties, but I'm here to help with weather-related questions. Please try again in a moment."
 
-    def _check_weather_query(self, user_message: str, user_location: str = None) -> Optional[str]:
+    def _check_weather_query(self, user_message: str, user_location: str = None) -> Optional[dict]:
         """
         Check if the user message is asking for weather information and get real data
 
@@ -294,7 +301,7 @@ Keep responses conversational but informative."""
             user_location (str, optional): User's saved location or detected location
 
         Returns:
-            str: Weather information if found, None otherwise
+            dict: Dictionary with 'weather_info' and 'location', or None if no weather query
         """
         message_lower = user_message.lower()
 
@@ -322,45 +329,45 @@ Keep responses conversational but informative."""
             r'(?:and|also)\s+(?:the\s+)?(?:weather\s+(?:in|of|for)\s+)?([A-Za-z\s]+?)(?:\s+weather|$|\?|!|,|\.)',
         ]
 
-        # ALWAYS look for capitalized words (city/country names) first
+        # Try pattern matching FIRST (more accurate for "weather in Tokyo" type queries)
         location = None
-        words = user_message.split()
-        # Skip common words that are capitalized (sentence starters, pronouns, etc.)
-        skip_words = ['I', 'What', 'When', 'Where', 'How', 'Why', 'Who', 'Is', 'Are', 'The', 'A', 'An', 'Tell', 'Show', 'Give', 'Can', 'Will', 'Would', 'Should', 'Could', 'My', 'Me', 'It']
-
-        # First pass: Look for any capitalized words (potential city/country names)
-        for i, word in enumerate(words):
-            # Remove punctuation from word for checking
-            clean_word = word.rstrip('?!.,;:')
-
-            if clean_word in skip_words or len(clean_word) <= 1:
-                continue
-
-            if clean_word[0].isupper():
-                # Check if it's followed by more capitalized words (multi-word place names)
-                location_parts = [clean_word]
-                for j in range(i + 1, len(words)):
-                    if j < len(words) and words[j]:
-                        next_word = words[j].rstrip('?!.,;:')
-                        if len(next_word) > 0 and next_word[0].isupper() and next_word not in skip_words:
-                            location_parts.append(next_word)
-                        else:
-                            break
-                location = ' '.join(location_parts)
-                if len(location) > 2:
+        for pattern in location_patterns:
+            match = re.search(pattern, message_lower)
+            if match:
+                location = match.group(1).strip()
+                # Remove time words from location
+                time_words = ['today', 'now', 'tomorrow', 'tonight', 'morning', 'afternoon', 'evening']
+                for word in time_words:
+                    location = location.replace(word, '').strip()
+                if location and len(location) > 2:  # Only use if location remains after cleaning
                     break
 
-        # If no capitalized word found, try pattern matching
+        # If pattern matching failed, look for capitalized words (city/country names)
         if not location:
-            for pattern in location_patterns:
-                match = re.search(pattern, message_lower)
-                if match:
-                    location = match.group(1).strip()
-                    # Remove time words from location
-                    time_words = ['today', 'now', 'tomorrow', 'tonight', 'morning', 'afternoon', 'evening']
-                    for word in time_words:
-                        location = location.replace(word, '').strip()
-                    if location:  # Only use if location remains after cleaning
+            words = user_message.split()
+            # Skip common words that are capitalized (sentence starters, pronouns, etc.)
+            skip_words = ['I', 'What', "What's", 'When', 'Where', 'How', "How's", 'Why', 'Who', 'Is', 'Are', 'The', 'A', 'An', 'Tell', 'Show', 'Give', 'Can', 'Will', 'Would', 'Should', 'Could', 'My', 'Me', 'It']
+
+            # Look for any capitalized words (potential city/country names)
+            for i, word in enumerate(words):
+                # Remove punctuation from word for checking
+                clean_word = word.rstrip('?!.,;:')
+
+                if clean_word in skip_words or len(clean_word) <= 1:
+                    continue
+
+                if clean_word[0].isupper():
+                    # Check if it's followed by more capitalized words (multi-word place names)
+                    location_parts = [clean_word]
+                    for j in range(i + 1, len(words)):
+                        if j < len(words) and words[j]:
+                            next_word = words[j].rstrip('?!.,;:')
+                            if len(next_word) > 0 and next_word[0].isupper() and next_word not in skip_words:
+                                location_parts.append(next_word)
+                            else:
+                                break
+                    location = ' '.join(location_parts)
+                    if len(location) > 2:
                         break
 
         # Check if it's a weather query
@@ -374,19 +381,25 @@ Keep responses conversational but informative."""
         if location:
             # Get weather data using the weather service
             try:
-                from ..views import get_weather_for_chatbot
+                from ..utils.weather_helpers import get_weather_for_chatbot
                 weather_data = get_weather_for_chatbot(city=location)
 
                 if weather_data['success']:
                     # Format comprehensive weather data for AI
                     formatted_data = f"Location: {weather_data['location']}, Temperature: {weather_data['temperature']} (feels like {weather_data['feels_like']}), Condition: {weather_data['condition']}, Humidity: {weather_data['humidity']}, Wind: {weather_data['wind_speed']}, Pressure: {weather_data['pressure']}, Visibility: {weather_data['visibility']}, Sunrise: {weather_data['sunrise']}, Sunset: {weather_data['sunset']}"
-                    return formatted_data
+                    return {
+                        'weather_info': formatted_data,
+                        'location': location
+                    }
                 else:
                     # Try with Philippines suffix for local places
                     weather_data = get_weather_for_chatbot(city=f"{location},PH")
                     if weather_data['success']:
                         formatted_data = f"Location: {weather_data['location']}, Temperature: {weather_data['temperature']} (feels like {weather_data['feels_like']}), Condition: {weather_data['condition']}, Humidity: {weather_data['humidity']}, Wind: {weather_data['wind_speed']}, Pressure: {weather_data['pressure']}, Visibility: {weather_data['visibility']}, Sunrise: {weather_data['sunrise']}, Sunset: {weather_data['sunset']}"
-                        return formatted_data
+                        return {
+                            'weather_info': formatted_data,
+                            'location': location
+                        }
                     else:
                         return None  # Let AI handle this case
 

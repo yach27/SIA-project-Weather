@@ -49,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom weather middleware for session-based alerts
+    'weather.middleware.WeatherDataMiddleware',
 ]
 
 ROOT_URLCONF = 'weather_chatbot.urls'

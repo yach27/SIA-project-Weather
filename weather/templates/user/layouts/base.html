@@ -80,25 +80,62 @@
 
         <!-- Main Content Area -->
         <main class="p-6">
-            <!-- Weather Alert Banner -->
-            <div id="weather-alert" class="hidden mb-6 rounded-lg p-4 shadow-lg border-l-4 transition-all duration-300">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="flex-shrink-0">
-                            <svg id="alert-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                            </svg>
+            <!-- Weather Alert Dialog (Small, Right Side, Animated Border) -->
+            <div id="weather-alert" class="hidden fixed right-6 top-24 z-50 w-80 rounded-xl shadow-2xl overflow-hidden animate-slide-in">
+                <style>
+                    @keyframes slide-in {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes border-pulse {
+                        0%, 100% {
+                            opacity: 1;
+                        }
+                        50% {
+                            opacity: 0.5;
+                        }
+                    }
+                    .animate-slide-in {
+                        animation: slide-in 0.5s ease-out;
+                    }
+                    .animate-border {
+                        position: relative;
+                    }
+                    .animate-border::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        bottom: 0;
+                        width: 4px;
+                        animation: border-pulse 2s ease-in-out infinite;
+                    }
+                </style>
+                <div class="animate-border">
+                    <div class="bg-white p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <div id="alert-icon-container" class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center">
+                                    <svg id="alert-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <h3 id="alert-title" class="font-bold text-sm"></h3>
+                            </div>
+                            <button onclick="dismissWeatherAlert()" class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <div>
-                            <h3 id="alert-title" class="font-semibold text-sm"></h3>
-                            <p id="alert-message" class="text-sm mt-1"></p>
-                        </div>
+                        <p id="alert-message" class="text-xs text-gray-600 leading-relaxed"></p>
                     </div>
-                    <button onclick="dismissWeatherAlert()" class="flex-shrink-0 ml-4 text-current hover:opacity-75">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
 
@@ -135,12 +172,23 @@ document.addEventListener('DOMContentLoaded', function() {
     loadWeatherAlert();
 });
 
-// Dismiss weather alert
-function dismissWeatherAlert() {
+// Dismiss weather alert using Django backend
+async function dismissWeatherAlert() {
     const alert = document.getElementById('weather-alert');
     alert.classList.add('hidden');
-    // Don't store dismissal - alert will show again on next page/refresh
-    console.log('Alert dismissed (will show again on next page)');
+
+    // Call Django API to dismiss alert (sets session flag)
+    try {
+        await fetch('/api/dismiss-alert/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        console.log('Alert dismissed via Django session - will not show again this session');
+    } catch (error) {
+        console.error('Error dismissing alert:', error);
+    }
 }
 
 // Load weather alert
@@ -151,7 +199,37 @@ async function loadWeatherAlert() {
         return;
     }
 
-    console.log('Loading weather alert...');
+    // Check if alert was dismissed using Django session
+    console.log('[Alert Check] Checking if alert was dismissed...');
+    try {
+        // Make a simple GET request to check session status
+        const checkResponse = await fetch('/api/dismiss-alert/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        console.log('[Alert Check] Response status:', checkResponse.status);
+
+        // If we can't check, continue with showing alert
+        if (checkResponse.ok) {
+            const data = await checkResponse.json();
+            console.log('[Alert Check] Response data:', data);
+
+            if (data.dismissed === true) {
+                console.log('[Alert Check] ✓ Alert was already dismissed - NOT showing');
+                return;
+            } else {
+                console.log('[Alert Check] Alert not yet dismissed - will show');
+            }
+        }
+    } catch (error) {
+        console.error('[Alert Check] Error checking alert status:', error);
+        // Continue to show alert if check fails
+    }
+
+    console.log('[Alert Check] Proceeding to load weather alert...');
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -299,13 +377,45 @@ function showWeatherAlert(temp, feelsLike, location, condition) {
     console.log('Setting alert content:', { title, message, bgColor, textColor, borderColor });
     alertTitle.textContent = title;
     alertMessage.textContent = message;
-    alert.className = `${bgColor} ${textColor} ${borderColor} mb-6 rounded-lg p-4 shadow-lg border-l-4 transition-all duration-300`;
     alertIcon.innerHTML = iconSVG;
 
-    // Show alert
+    // Update icon container background
+    const iconContainer = document.getElementById('alert-icon-container');
+    if (iconContainer) {
+        iconContainer.className = `flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${bgColor}`;
+    }
+
+    // Update title color
+    alertTitle.className = `font-bold text-sm ${textColor}`;
+
+    // Update animated border color
+    const animatedBorder = alert.querySelector('.animate-border');
+    if (animatedBorder && animatedBorder.querySelector('::before')) {
+        // Set the border color via inline style
+        const borderColorHex = borderColor.replace('border-', '');
+        animatedBorder.style.setProperty('--border-color', borderColorHex);
+    }
+
+    // Set animated border color using CSS variable
+    const style = document.createElement('style');
+    style.textContent = `
+        #weather-alert .animate-border::before {
+            background-color: ${borderColor.replace('border-', '')
+                .replace('red-500', '#ef4444')
+                .replace('orange-500', '#f97316')
+                .replace('blue-500', '#3b82f6')
+                .replace('cyan-500', '#06b6d4')
+                .replace('green-500', '#22c55e')
+                .replace('indigo-500', '#6366f1')
+            };
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Show alert with animation
     console.log('Removing hidden class from alert');
     alert.classList.remove('hidden');
-    console.log('Alert should now be visible. Alert classes:', alert.className);
+    console.log('Alert should now be visible');
 }
 </script>
 </body>
