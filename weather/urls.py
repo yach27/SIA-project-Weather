@@ -10,6 +10,8 @@ from .views import (
     WeatherForecastAPIView,
     SearchLocationsAPIView,
     TemperatureAlertAPIView,
+    UserLocationAPIView,
+    AdminUserLocationsAPIView,
 )
 
 urlpatterns = [
@@ -23,6 +25,7 @@ urlpatterns = [
     path('admin-alerts/', views.admin_weather_alerts, name='admin_weather_alerts'),
     path('admin-map/', views.admin_weather_map, name='admin_weather_map'),
     path('admin-users/', views.admin_users, name='admin_users'),
+    path('admin-logs/', views.admin_logs, name='admin_logs'),
 
     # API URLs - Using Class-Based Views (Django Best Practice)
     path('api/chatbot/', ChatbotAPIView.as_view(), name='chatbot_api'),
@@ -34,6 +37,8 @@ urlpatterns = [
     path('api/weather/forecast/', WeatherForecastAPIView.as_view(), name='weather_forecast_api'),
     path('api/weather/search/', SearchLocationsAPIView.as_view(), name='search_locations_api'),
     path('api/temperature-alert/', TemperatureAlertAPIView.as_view(), name='temperature_alert_api'),
+    path('api/user-location/', UserLocationAPIView.as_view(), name='user_location_api'),
+    path('api/admin/user-locations/', AdminUserLocationsAPIView.as_view(), name='admin_user_locations_api'),
 
     # User URLs
     path('dashboard/', views.user_dashboard, name='user_dashboard'),

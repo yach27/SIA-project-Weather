@@ -1,22 +1,31 @@
-<!-- Map Container with Sidebar -->
-<div class="bg-white rounded-lg shadow-sm overflow-hidden">
-    <div class="flex">
-        {% include 'user/components/map/weather_info_panel.html' %}
+<!-- Full Screen Map Container -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden relative">
+    <!-- Full Screen Map -->
+    <div id="weather-map" class="map-container relative" style="height: 85vh; min-height: 700px;"></div>
 
-        <!-- Map Container -->
-        <div class="flex-1 relative">
-            <div id="weather-map" class="map-container relative" style="height: 70vh; min-height: 500px;"></div>
+    <!-- Map Legend -->
+    {% include 'user/components/map/map_legend.html' %}
 
-            <!-- Map Legend -->
-            {% include 'user/components/map/map_legend.html' %}
-
-            <!-- Map Loading Indicator -->
-            <div id="map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                    <p class="mt-2 text-sm text-gray-600">Loading map...</p>
-                </div>
+    <!-- Weather Info Popup (appears on location select) -->
+    <div id="weather-info-popup" class="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl overflow-hidden hidden z-[1000] transform transition-all duration-300 max-h-[90vh] overflow-y-auto">
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-semibold text-gray-800">Weather Details</h3>
+                <button id="close-popup" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
+            {% include 'user/components/map/weather_info_content.html' %}
+        </div>
+    </div>
+
+    <!-- Map Loading Indicator -->
+    <div id="map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-[999]">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-2 text-sm text-gray-600">Loading map...</p>
         </div>
     </div>
 </div>

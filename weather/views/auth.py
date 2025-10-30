@@ -21,8 +21,12 @@ def signin(request):
         # Try to find user by email (since Django uses username by default)
         from django.contrib.auth.models import User
         try:
-            user_obj = User.objects.get(email=email)
-            username = user_obj.username
+            user_obj = User.objects.filter(email=email).first()
+            if user_obj:
+                username = user_obj.username
+            else:
+                # Try to authenticate with email as username
+                username = email
         except User.DoesNotExist:
             # Try to authenticate with email as username
             username = email
@@ -51,6 +55,33 @@ def signup(request):
 
 def user_logout(request):
     """User logout"""
+    # Log the logout activity BEFORE logging out (only for regular users, not superusers/admins)
+    if request.user.is_authenticated and not request.user.is_superuser:
+        from ..models import ActivityLog
+
+        # Get client IP address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip_address = x_forwarded_for.split(',')[0]
+        else:
+            ip_address = request.META.get('REMOTE_ADDR')
+
+        # Get user agent
+        user_agent = request.META.get('HTTP_USER_AGENT', '')[:255]
+
+        # Create logout log
+        try:
+            ActivityLog.objects.create(
+                user=request.user,
+                activity_type='logout',
+                description=f'User {request.user.email} logged out',
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata=None
+            )
+        except Exception as e:
+            print(f"Failed to log logout activity: {e}")
+
     logout(request)
     messages.success(request, 'You have been logged out successfully')
     return redirect('signin')

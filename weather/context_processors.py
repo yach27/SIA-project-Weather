@@ -6,4 +6,5 @@ def api_keys(request):
     """Make API keys available in all templates"""
     return {
         'OPENWEATHER_API_KEY': settings.OPENWEATHER_API_KEY,
+        'WINDY_API_KEY': settings.WINDY_API_KEY,
     }

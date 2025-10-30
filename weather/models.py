@@ -203,3 +203,59 @@ class SystemLog(models.Model):
 
     def __str__(self):
         return f"[{self.level.upper()}] {self.module}: {self.message[:50]}..."
+
+
+class ActivityLog(models.Model):
+    """
+    Model to track user activities for admin monitoring
+    """
+
+    ACTIVITY_TYPES = (
+        ('login', 'User Login'),
+        ('logout', 'User Logout'),
+        ('signup', 'User Signup'),
+        ('chat', 'Chat Message'),
+        ('weather_query', 'Weather Query'),
+        ('alert_view', 'Alert Viewed'),
+        ('settings_change', 'Settings Changed'),
+        ('map_view', 'Map Viewed'),
+        ('api_call', 'API Call'),
+        ('error', 'Error Occurred'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activity_logs')
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
+    description = models.TextField()
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    # Additional context
+    metadata = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'activity_logs'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['-timestamp']),
+            models.Index(fields=['user', '-timestamp']),
+            models.Index(fields=['activity_type', '-timestamp']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} - {self.get_activity_type_display()} at {self.timestamp}"
+
+
+class UserLocation(models.Model):
+    """Track user location for display on admin map"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='current_location')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    location_name = models.CharField(max_length=200, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_locations'
+
+    def __str__(self):
+        return f"{self.user.email} at ({self.latitude}, {self.longitude})"

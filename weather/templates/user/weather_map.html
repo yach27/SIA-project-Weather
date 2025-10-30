@@ -10,18 +10,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-4">
     {% include 'user/components/map/weather_controls.html' %}
     {% include 'user/components/map/map_container.html' %}
-   
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-// Set API key from Django settings before loading weather_map.js
+// Set API key from Django settings before loading map modules
 window.OPENWEATHER_API_KEY_FROM_ENV = "{{ OPENWEATHER_API_KEY }}";
 </script>
-<script src="{% load static %}{% static 'js/weather_map.js' %}"></script>
+
+<!-- Load map modules in correct order -->
+{% load static %}
+{% now "U" as cache_bust %}
+<script src="{% static 'js/map/map_config.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/map_utils.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/map_layers.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/weather_overlays.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/weather_data.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/map_controls.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/map_init.js' %}?v={{ cache_bust }}"></script>
 {% endblock %}

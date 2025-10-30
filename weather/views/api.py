@@ -556,3 +556,64 @@ class TemperatureAlertAPIView(LoginRequiredMixin, View):
                 'success': False,
                 'error': 'Internal server error'
             }, status=500)
+
+
+class UserLocationAPIView(LoginRequiredMixin, View):
+    """API to update/get user location"""
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request):
+        """Update user location"""
+        try:
+            from ..models import UserLocation
+            data = json.loads(request.body)
+            lat = data.get('latitude')
+            lon = data.get('longitude')
+            location_name = data.get('location_name', '')
+
+            UserLocation.objects.update_or_create(
+                user=request.user,
+                defaults={
+                    'latitude': lat,
+                    'longitude': lon,
+                    'location_name': location_name
+                }
+            )
+            return JsonResponse({'success': True})
+        except Exception as e:
+            logger.error(f"User location update error: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+class AdminUserLocationsAPIView(LoginRequiredMixin, View):
+    """API to get all active user locations for admin map"""
+
+    def get(self, request):
+        """Get all user locations"""
+        if not (request.user.is_staff or request.user.is_superuser):
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+        try:
+            from ..models import UserLocation
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+
+            locations = []
+            for loc in UserLocation.objects.select_related('user').all():
+                if not loc.user.is_superuser:  # Only show regular users (not superusers/admins)
+                    locations.append({
+                        'email': loc.user.email,
+                        'username': loc.user.username,
+                        'latitude': float(loc.latitude),
+                        'longitude': float(loc.longitude),
+                        'location_name': loc.location_name,
+                        'updated_at': loc.updated_at.isoformat()
+                    })
+
+            return JsonResponse({'success': True, 'locations': locations})
+        except Exception as e:
+            logger.error(f"Admin user locations API error: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)

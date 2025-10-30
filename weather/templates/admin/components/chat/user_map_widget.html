@@ -1,0 +1,46 @@
+<!-- User Locations Map Widget (Small) -->
+<div class="absolute top-4 right-4 bg-white rounded-lg shadow-lg overflow-hidden z-[900]" style="width: 280px;">
+    <!-- Map Header -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 px-3 py-2 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+            </svg>
+            <h4 class="text-white text-sm font-semibold">User Locations</h4>
+        </div>
+        <div class="flex items-center space-x-2">
+            
+            <button id="refresh-user-map" class="text-white hover:text-gray-200 transition-colors" title="Refresh">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+            <button id="toggle-chat-map" class="text-white hover:text-gray-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mini Map Container -->
+    <div id="chat-map-content" class="transition-all duration-300">
+        <div class="relative" style="height: 200px;">
+            <div id="admin-chat-user-map" style="width: 100%; height: 100%;"></div>
+
+            <!-- Loading Overlay -->
+            <div id="chat-map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center hidden">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User List -->
+        <div class="border-t border-gray-200 p-2 bg-gray-50" style="max-height: 120px; overflow-y: auto;">
+            <div id="user-list" class="space-y-1">
+                <!-- User items will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>

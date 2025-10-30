@@ -1,0 +1,19 @@
+{% extends 'admin/layouts/base.html' %}
+
+{% block title %}System Logs - ClimaChat Admin{% endblock %}
+
+{% block page_title %}System Logs & Activity Monitoring{% endblock %}
+{% block page_subtitle %}Monitor user activities and system events{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Stats Cards Component -->
+    {% include 'admin/components/logs/stats_cards.html' %}
+
+    <!-- Filters Component -->
+    {% include 'admin/components/logs/filters.html' %}
+
+    <!-- Logs Table Component -->
+    {% include 'admin/components/logs/logs_table.html' %}
+</div>
+{% endblock %}

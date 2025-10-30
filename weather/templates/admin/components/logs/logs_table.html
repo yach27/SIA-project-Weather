@@ -1,0 +1,122 @@
+<!-- Logs Table -->
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">
+            {% if log_type == 'activity' %}Activity Logs{% else %}System Logs{% endif %}
+        </h3>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                    {% if log_type == 'activity' %}
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                    {% else %}
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Module</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for log in logs %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                    </td>
+                    {% if log_type == 'activity' %}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ log.user.email }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if log.activity_type == 'login' %}bg-green-100 text-green-800
+                            {% elif log.activity_type == 'logout' %}bg-gray-100 text-gray-800
+                            {% elif log.activity_type == 'error' %}bg-red-100 text-red-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ log.get_activity_type_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
+                        {{ log.description }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ log.ip_address|default:"-" }}
+                    </td>
+                    {% else %}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if log.level == 'error' %}bg-red-100 text-red-800
+                            {% elif log.level == 'warning' %}bg-yellow-100 text-yellow-800
+                            {% elif log.level == 'critical' %}bg-purple-100 text-purple-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ log.get_level_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ log.module }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
+                        {{ log.message }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ log.user.email|default:"-" }}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if log_type == 'activity' %}5{% else %}4{% endif %}" class="px-6 py-4 text-center text-sm text-gray-500">
+                        No logs found for the selected filters.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if logs.has_other_pages %}
+    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="flex-1 flex justify-between sm:hidden">
+            {% if logs.has_previous %}
+            <a href="?page={{ logs.previous_page_number }}&type={{ log_type }}&activity={{ activity_filter }}&user={{ user_filter }}&date={{ date_filter }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Previous
+            </a>
+            {% endif %}
+            {% if logs.has_next %}
+            <a href="?page={{ logs.next_page_number }}&type={{ log_type }}&activity={{ activity_filter }}&user={{ user_filter }}&date={{ date_filter }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Next
+            </a>
+            {% endif %}
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing page <span class="font-medium">{{ logs.number }}</span> of <span class="font-medium">{{ logs.paginator.num_pages }}</span>
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    {% if logs.has_previous %}
+                    <a href="?page={{ logs.previous_page_number }}&type={{ log_type }}&activity={{ activity_filter }}&user={{ user_filter }}&date={{ date_filter }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if logs.has_next %}
+                    <a href="?page={{ logs.next_page_number }}&type={{ log_type }}&activity={{ activity_filter }}&user={{ user_filter }}&date={{ date_filter }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        Next
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

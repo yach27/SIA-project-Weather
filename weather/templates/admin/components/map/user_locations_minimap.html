@@ -1,0 +1,30 @@
+<!-- User Locations Mini Map -->
+<div class="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg overflow-hidden z-[900]" style="width: 280px;">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+            </svg>
+            <h4 class="text-white text-sm font-semibold">User Locations</h4>
+        </div>
+        <button id="toggle-minimap" class="text-white hover:text-gray-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mini Map Container -->
+    <div id="minimap-content" class="transition-all duration-300">
+        <div id="user-locations-minimap" style="height: 200px; width: 100%;"></div>
+
+        <!-- User Count -->
+        <div class="px-3 py-2 bg-gray-50 border-t border-gray-200">
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-600">Active Users</span>
+                <span id="minimap-user-count" class="font-semibold text-blue-600">0</span>
+            </div>
+        </div>
+    </div>
+</div>

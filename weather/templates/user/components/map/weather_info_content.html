@@ -1,0 +1,74 @@
+<div id="location-info" class="space-y-4">
+    <!-- Weather Details (visible by default in popup) -->
+    <div id="weather-details" class="space-y-4">
+        <!-- Location Header -->
+        <div class="text-center border-b border-gray-200 pb-4">
+            <h3 id="selected-location" class="text-lg font-semibold text-gray-800"></h3>
+            <p id="selected-coords" class="text-xs text-gray-500 mt-1"></p>
+            <p id="selected-time" class="text-xs text-gray-600 mt-1"></p>
+        </div>
+
+        <!-- Current Weather -->
+        <div class="bg-white bg-opacity-60 rounded-lg p-4">
+            <div class="text-center mb-3">
+                <div class="text-3xl font-bold text-blue-600 mb-1" id="current-temp">--°</div>
+                <div class="text-sm text-gray-600" id="weather-condition">--</div>
+                <div class="text-xs text-gray-500">Feels like <span id="feels-like">--°</span></div>
+            </div>
+
+            <!-- Weather Metrics Grid -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-white bg-opacity-50 rounded-lg p-2 text-center">
+                    <div class="font-semibold text-gray-700" id="humidity">--%</div>
+                    <div class="text-gray-600">Humidity</div>
+                </div>
+
+                <div class="bg-white bg-opacity-50 rounded-lg p-2 text-center">
+                    <div class="font-semibold text-gray-700" id="wind-speed">-- km/h</div>
+                    <div class="text-gray-600">Wind</div>
+                </div>
+
+                <div class="bg-white bg-opacity-50 rounded-lg p-2 text-center">
+                    <div class="font-semibold text-gray-700" id="pressure">-- hPa</div>
+                    <div class="text-gray-600">Pressure</div>
+                </div>
+
+                <div class="bg-white bg-opacity-50 rounded-lg p-2 text-center">
+                    <div class="font-semibold text-gray-700" id="visibility">-- km</div>
+                    <div class="text-gray-600">Visibility</div>
+                </div>
+
+                <div class="bg-white bg-opacity-50 rounded-lg p-2 text-center">
+                    <div class="font-semibold text-gray-700" id="uv-index">--</div>
+                    <div class="text-gray-600">UV Index</div>
+                </div>
+
+                <div class="bg-white bg-opacity-50 rounded-lg p-2 text-center">
+                    <div class="font-semibold text-gray-700" id="air-quality">--</div>
+                    <div class="text-gray-600">Air Quality</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hourly Forecast -->
+        <div class="bg-white bg-opacity-60 rounded-lg p-4">
+            <div class="text-sm font-medium text-gray-800 mb-3">24-Hour Forecast</div>
+            <div id="hourly-forecast" class="space-y-2">
+                <!-- Hourly forecast items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Weather Alerts -->
+        <div id="weather-alerts" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 hidden">
+            <div class="flex items-center">
+                <svg class="w-4 h-4 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <div class="text-sm font-medium text-yellow-800">Weather Alert</div>
+                    <div class="text-xs text-yellow-700" id="alert-message">Strong winds expected</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
