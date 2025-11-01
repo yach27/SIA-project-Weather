@@ -1,0 +1,18 @@
+{% extends "admin/layouts/base.html" %}
+
+{% block title %}Profile - ClimaChat Admin{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+        Admin Profile
+    </h1>
+    <p class="text-gray-600 text-lg">Manage your account information</p>
+</div>
+
+<!-- Profile Card - Centered -->
+<div class="max-w-2xl mx-auto">
+    {% include 'admin/components/profile/profile_card.html' %}
+</div>
+{% endblock %}

@@ -48,7 +48,7 @@ When you receive real weather data in the format [REAL WEATHER DATA: ...], use t
 
 Keep responses conversational but informative."""
 
-    def get_chatbot_response(self, user_message: str, conversation_history: Optional[list] = None, user_location: str = None, current_weather_data: dict = None) -> Dict[str, Any]:
+    def get_chatbot_response(self, user_message: str, conversation_history: Optional[list] = None, user_location: str = None, current_weather_data: dict = None, user_locations: Optional[list] = None, user_weather_data: dict = None, is_admin: bool = False) -> Dict[str, Any]:
         """
         Get response from Groq API for the user message
 
@@ -57,6 +57,9 @@ Keep responses conversational but informative."""
             conversation_history (list, optional): Previous conversation messages
             user_location (str, optional): User's location for weather queries
             current_weather_data (dict, optional): Current weather data from the map
+            user_locations (list, optional): List of user locations for admin queries
+            user_weather_data (dict, optional): Weather data for specific user from frontend
+            is_admin (bool, optional): Whether this is an admin user
 
         Returns:
             Dict containing response data or error information
@@ -86,8 +89,55 @@ Keep responses conversational but informative."""
                     weather_info = weather_result
 
             # Build messages array
+            system_prompt = self.get_system_prompt()
+
+            # Add admin context if user locations are provided
+            if is_admin and user_locations:
+                try:
+                    print(f"\nADMIN MODE ENABLED")
+                    print(f"User locations count: {len(user_locations)}")
+                    print(f"User weather data received: {user_weather_data}")
+
+                    user_loc_info = "\n\n[ADMIN MODE - USER LOCATIONS DATA]:\n"
+                    for loc in user_locations:
+                        username = loc['username']
+                        location_name = loc.get('location_name') or 'Unknown location'
+                        user_loc_info += f"- {username} ({loc['email']}): {location_name} at ({loc['latitude']}, {loc['longitude']})\n"
+
+                    # If weather data for a specific user was fetched by frontend, add it to context
+                    if user_weather_data:
+                        username = user_weather_data.get('username')
+                        location = user_weather_data.get('location', 'Unknown location')
+                        temp = user_weather_data.get('temperature')
+                        feels_like = user_weather_data.get('feels_like')
+                        condition = user_weather_data.get('condition')
+                        humidity = user_weather_data.get('humidity')
+                        wind_speed = user_weather_data.get('wind_speed')
+                        pressure = user_weather_data.get('pressure')
+
+                        weather_context = (
+                            f"\n\n[REAL-TIME WEATHER DATA for {username} in {location}]:\n"
+                            f"Temperature: {temp}°C (feels like {feels_like}°C)\n"
+                            f"Condition: {condition}\n"
+                            f"Humidity: {humidity}%\n"
+                            f"Wind Speed: {wind_speed} m/s\n"
+                            f"Pressure: {pressure} hPa"
+                        )
+                        user_loc_info += weather_context
+                        print(f"WEATHER CONTEXT ADDED TO PROMPT:")
+                        print(weather_context)
+                    else:
+                        print(f"NO WEATHER DATA - user_weather_data is None or empty")
+
+                    user_loc_info += "\n\nYou can answer questions about user locations and provide weather information when available. When real-time weather data is provided above, use it to give accurate current conditions."
+                    system_prompt += user_loc_info
+                    print(f"Final system prompt length: {len(system_prompt)} characters")
+                except Exception as e:
+                    logger.error(f"Error adding admin context: {e}")
+                    print(f"ERROR in admin context: {e}")
+
             messages = [
-                {"role": "system", "content": self.get_system_prompt()}
+                {"role": "system", "content": system_prompt}
             ]
 
             # Add conversation history if provided

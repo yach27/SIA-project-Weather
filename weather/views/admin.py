@@ -103,9 +103,13 @@ def admin_users(request):
         return redirect('signin')
 
     User = get_user_model()
+    from ..models import UserLocation
 
-    # Get all users excluding staff/admin
-    all_users = User.objects.filter(is_staff=False, is_superuser=False).order_by('-date_joined')
+    # Get all users excluding staff/admin with their locations
+    all_users = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).select_related('current_location').order_by('-date_joined')
 
     # Calculate stats
     total_users = all_users.count()
@@ -218,3 +222,93 @@ def admin_logs(request):
         'log_levels': SystemLog.LOG_LEVELS,
     }
     return render(request, 'admin/logs.html', context)
+
+
+def admin_profile(request):
+    """Admin profile page"""
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        return redirect('signin')
+
+    # Get admin activity stats
+    admin_activities = ActivityLog.objects.filter(
+        user=request.user
+    ).order_by('-timestamp')[:10]
+
+    # Count total actions
+    total_actions = ActivityLog.objects.filter(user=request.user).count()
+
+    # Get recent chat history count
+    from ..models import AdminChatHistory
+    total_chats = AdminChatHistory.objects.filter(admin_user=request.user).count()
+
+    context = {
+        'recent_activities': admin_activities,
+        'total_actions': total_actions,
+        'total_chats': total_chats,
+    }
+    return render(request, 'admin/profile.html', context)
+
+
+def admin_profile_edit(request):
+    """Edit admin profile"""
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        return redirect('signin')
+
+    if request.method == 'POST':
+        from django.contrib import messages
+        from django.core.files.storage import default_storage
+        import os
+
+        # Update user basic info
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+
+        request.user.first_name = first_name
+        request.user.last_name = last_name
+
+        # Handle profile image upload
+        if 'profile_pic' in request.FILES:
+            uploaded_file = request.FILES['profile_pic']
+
+            # Delete old image if exists
+            if request.user.profile_pic:
+                old_file_path = os.path.join('media', request.user.profile_pic)
+                if default_storage.exists(old_file_path):
+                    default_storage.delete(old_file_path)
+
+            # Save new image
+            file_path = default_storage.save(f'profile_images/{uploaded_file.name}', uploaded_file)
+            request.user.profile_pic = file_path
+
+        request.user.save()
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('admin_profile')
+
+    return redirect('admin_profile')
+
+
+def admin_profile_remove_image(request):
+    """Remove admin profile image"""
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'})
+
+    if request.method == 'POST':
+        from django.core.files.storage import default_storage
+        import os
+
+        try:
+            if request.user.profile_pic:
+                # Delete file from storage
+                old_file_path = os.path.join('media', request.user.profile_pic)
+                if default_storage.exists(old_file_path):
+                    default_storage.delete(old_file_path)
+
+                # Clear database field
+                request.user.profile_pic = None
+                request.user.save()
+                return JsonResponse({'success': True})
+            return JsonResponse({'success': False, 'error': 'No image to remove'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})

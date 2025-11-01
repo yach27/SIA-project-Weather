@@ -15,6 +15,28 @@ class UserLocationTracker {
 
     async sendLocation(position) {
         try {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            // Get location name using reverse geocoding (Nominatim API)
+            let locationName = '';
+            try {
+                const geoResponse = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`
+                );
+                const geoData = await geoResponse.json();
+
+                // Extract city, state, or country from response
+                if (geoData.address) {
+                    const addr = geoData.address;
+                    locationName = addr.city || addr.town || addr.village ||
+                                   addr.municipality || addr.county ||
+                                   addr.state || addr.country || 'Unknown';
+                }
+            } catch (geoError) {
+                console.log('Reverse geocoding failed, using coordinates:', geoError);
+            }
+
             const response = await fetch('/api/user-location/', {
                 method: 'POST',
                 headers: {
@@ -22,14 +44,14 @@ class UserLocationTracker {
                     'X-CSRFToken': this.getCookie('csrftoken')
                 },
                 body: JSON.stringify({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    location_name: ''
+                    latitude: lat,
+                    longitude: lon,
+                    location_name: locationName
                 })
             });
             const data = await response.json();
             if (data.success) {
-                console.log('Location updated successfully');
+                console.log('Location updated successfully:', locationName);
             }
         } catch (error) {
             console.error('Failed to send location:', error);

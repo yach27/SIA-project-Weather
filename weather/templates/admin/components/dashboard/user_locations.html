@@ -22,7 +22,13 @@
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                         </svg>
-                        <span class="text-sm">{{ location.latitude|floatformat:2 }}, {{ location.longitude|floatformat:2 }}</span>
+                        <span class="text-sm" title="{{ location.latitude|floatformat:2 }}, {{ location.longitude|floatformat:2 }}">
+                            {% if location.location_name %}
+                                {{ location.location_name }}
+                            {% else %}
+                                {{ location.latitude|floatformat:2 }}, {{ location.longitude|floatformat:2 }}
+                            {% endif %}
+                        </span>
                     </div>
                     <p class="text-xs text-gray-400 mt-1">{{ location.updated_at|timesince }} ago</p>
                 </div>
@@ -33,11 +39,5 @@
                 <p>No user locations available</p>
             </div>
         {% endif %}
-    </div>
-    <div class="mt-4 pt-4 border-t border-gray-200">
-        <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600">Total Active Users</span>
-            <span class="font-medium text-gray-900">{{ user_locations.count }} online</span>
-        </div>
     </div>
 </div>

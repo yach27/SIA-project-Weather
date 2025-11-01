@@ -1,0 +1,52 @@
+<!-- Recent Activity Component -->
+<div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-900">Recent Activity</h3>
+        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Last 10</span>
+    </div>
+
+    <!-- Activity List -->
+    <div class="space-y-3">
+        {% if recent_activities %}
+            {% for activity in recent_activities %}
+            <div class="flex items-center space-x-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors">
+                <!-- Icon -->
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center
+                    {% if activity.activity_type == 'login' %}bg-blue-100
+                    {% elif activity.activity_type == 'chat' %}bg-green-100
+                    {% elif activity.activity_type == 'weather_query' %}bg-purple-100
+                    {% else %}bg-gray-100{% endif %}">
+                    <svg class="w-5 h-5
+                        {% if activity.activity_type == 'login' %}text-blue-600
+                        {% elif activity.activity_type == 'chat' %}text-green-600
+                        {% elif activity.activity_type == 'weather_query' %}text-purple-600
+                        {% else %}text-gray-600{% endif %}"
+                        fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+
+                <!-- Details -->
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-900">{{ activity.get_activity_type_display }}</p>
+                    <p class="text-xs text-gray-500">{{ activity.description }}</p>
+                </div>
+
+                <!-- Time -->
+                <span class="text-xs text-gray-400">{{ activity.timestamp|timesince }} ago</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500">No recent activity</p>
+            </div>
+        {% endif %}
+    </div>
+</div>

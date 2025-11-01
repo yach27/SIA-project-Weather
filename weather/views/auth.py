@@ -49,7 +49,67 @@ def signin(request):
 
 def signup(request):
     """User registration page"""
-    # Signup logic here
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        middle_name = request.POST.get('middle_name', '')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # Validation
+        if not username or not first_name or not last_name or not email or not password:
+            messages.error(request, 'All required fields must be filled')
+            return render(request, 'weather/signup.html')
+
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match')
+            return render(request, 'weather/signup.html')
+
+        if len(password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long')
+            return render(request, 'weather/signup.html')
+
+        # Check if user already exists
+        from django.contrib.auth.models import User
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists')
+            return render(request, 'weather/signup.html')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already registered')
+            return render(request, 'weather/signup.html')
+
+        # Create user
+        try:
+            from django.db import connection
+
+            # Create user with first and last name
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            user.save()
+
+            # Save middle_name directly to auth_user table if the column exists
+            if middle_name:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE auth_user SET middle_name = %s WHERE id = %s",
+                        [middle_name, user.id]
+                    )
+
+            messages.success(request, 'Account created successfully! Please login.')
+            return redirect('signin')
+
+        except Exception as e:
+            messages.error(request, f'Error creating account: {str(e)}')
+            return render(request, 'weather/signup.html')
+
     return render(request, 'weather/signup.html')
 
 

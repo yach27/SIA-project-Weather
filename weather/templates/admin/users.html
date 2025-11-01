@@ -98,10 +98,6 @@
                     <option value="admin">Admin</option>
                     <option value="user">User</option>
                 </select>
-
-                <button id="export-users" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    Export CSV
-                </button>
             </div>
         </div>
     </div>
@@ -165,7 +161,22 @@
                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">User</span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">
-                            --
+                            {% if user.current_location %}
+                            <div class="flex items-center space-x-1">
+                                <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span title="{{ user.current_location.latitude }}, {{ user.current_location.longitude }}">
+                                    {% if user.current_location.location_name %}
+                                        {{ user.current_location.location_name }}
+                                    {% else %}
+                                        {{ user.current_location.latitude|floatformat:2 }}, {{ user.current_location.longitude|floatformat:2 }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% else %}
+                            <span class="text-gray-400">--</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">
                             {% if user.last_login %}

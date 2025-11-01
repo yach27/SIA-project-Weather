@@ -87,13 +87,51 @@
                     <form method="POST" class="space-y-3">
                         {% csrf_token %}
 
-                        <!-- Full Name Field -->
+                        <!-- Username Field -->
                         <div>
-                            <label class="block text-gray-700 text-xs font-medium mb-1">Full Name</label>
+                            <label class="block text-gray-700 text-xs font-medium mb-1">Username</label>
                             <input
                                 type="text"
-                                name="full_name"
-                                placeholder="John Doe"
+                                name="username"
+                                placeholder="johndoe"
+                                class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-md text-gray-800 placeholder-gray-400 transition-all"
+                                required
+                            >
+                        </div>
+
+                        <!-- Name Fields Grid -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- First Name Field -->
+                            <div>
+                                <label class="block text-gray-700 text-xs font-medium mb-1">First Name</label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    placeholder="John"
+                                    class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-md text-gray-800 placeholder-gray-400 transition-all"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Middle Name Field -->
+                            <div>
+                                <label class="block text-gray-700 text-xs font-medium mb-1">Middle <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input
+                                    type="text"
+                                    name="middle_name"
+                                    placeholder="M."
+                                    class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-md text-gray-800 placeholder-gray-400 transition-all"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Last Name Field -->
+                        <div>
+                            <label class="block text-gray-700 text-xs font-medium mb-1">Last Name</label>
+                            <input
+                                type="text"
+                                name="last_name"
+                                placeholder="Doe"
                                 class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-md text-gray-800 placeholder-gray-400 transition-all"
                                 required
                             >
@@ -106,18 +144,6 @@
                                 type="email"
                                 name="email"
                                 placeholder="your@email.com"
-                                class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-md text-gray-800 placeholder-gray-400 transition-all"
-                                required
-                            >
-                        </div>
-
-                        <!-- Username Field -->
-                        <div>
-                            <label class="block text-gray-700 text-xs font-medium mb-1">Username</label>
-                            <input
-                                type="text"
-                                name="username"
-                                placeholder="johndoe"
                                 class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-md text-gray-800 placeholder-gray-400 transition-all"
                                 required
                             >

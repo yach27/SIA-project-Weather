@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+# Add profile_pic field to User model (since it exists in auth_user table)
+User.add_to_class('profile_pic', models.CharField(max_length=255, blank=True, null=True))
+
 class UserProfile(models.Model):
     """
     Extended profile for Django's default User model
@@ -14,8 +17,10 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     user_type = models.CharField(max_length=10, choices=USER_TYPES, default='user')
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
 
     # User preferences
     weather_alerts_enabled = models.BooleanField(default=True)
@@ -259,3 +264,21 @@ class UserLocation(models.Model):
 
     def __str__(self):
         return f"{self.user.email} at ({self.latitude}, {self.longitude})"
+
+
+class AdminChatHistory(models.Model):
+    """Store admin chat conversations with AI"""
+    admin_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_chat_history')
+    session_id = models.CharField(max_length=100, blank=True, null=True)  # Group messages in same conversation thread
+    message = models.TextField()
+    response = models.TextField()
+    user_mentioned = models.CharField(max_length=100, blank=True, null=True)  # Username if querying about a user
+    weather_data = models.JSONField(null=True, blank=True)  # Weather data if fetched
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'admin_chat_history'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.admin_user.username} - {self.timestamp}"

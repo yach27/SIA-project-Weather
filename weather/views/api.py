@@ -41,7 +41,10 @@ class ChatbotAPIView(LoginRequiredMixin, View):
             "message": "user message",
             "conversation_history": [],  # optional
             "user_location": "City Name",  # optional
-            "current_weather_data": {}  # optional
+            "current_weather_data": {},  # optional
+            "user_locations": [],  # optional - for admin queries
+            "user_weather_data": {},  # optional - weather data for specific user
+            "is_admin": false  # optional - indicates admin user
         }
         """
         try:
@@ -50,6 +53,9 @@ class ChatbotAPIView(LoginRequiredMixin, View):
             conversation_history = data.get('conversation_history', [])
             user_location = data.get('user_location')
             current_weather_data = data.get('current_weather_data')
+            user_locations = data.get('user_locations', [])
+            user_weather_data = data.get('user_weather_data')
+            is_admin = data.get('is_admin', False)
 
             # Validate message
             if not user_message:
@@ -68,10 +74,30 @@ class ChatbotAPIView(LoginRequiredMixin, View):
                 user_message=user_message,
                 conversation_history=conversation_history,
                 user_location=user_location,
-                current_weather_data=current_weather_data
+                current_weather_data=current_weather_data,
+                user_locations=user_locations if is_admin else None,
+                user_weather_data=user_weather_data,
+                is_admin=is_admin
             )
 
             if result['success']:
+                # Save admin chat history if admin user
+                save_to_history = data.get('save_to_history', True)
+                session_id = data.get('session_id')  # Get session ID from request
+                if is_admin and request.user.is_staff and save_to_history:
+                    try:
+                        from ..models import AdminChatHistory
+                        AdminChatHistory.objects.create(
+                            admin_user=request.user,
+                            session_id=session_id,  # Add session ID to group conversation threads
+                            message=user_message,
+                            response=result['response'],
+                            user_mentioned=user_weather_data.get('username') if user_weather_data else None,
+                            weather_data=user_weather_data
+                        )
+                    except Exception as e:
+                        logger.error(f"Failed to save admin chat history: {e}")
+
                 return self._build_success_response(
                     result,
                     user_message,
@@ -616,4 +642,103 @@ class AdminUserLocationsAPIView(LoginRequiredMixin, View):
             return JsonResponse({'success': True, 'locations': locations})
         except Exception as e:
             logger.error(f"Admin user locations API error: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+class AdminChatHistoryAPIView(LoginRequiredMixin, View):
+    """API to get and manage admin chat history"""
+
+    def get(self, request):
+        """Get chat history for current admin"""
+        if not (request.user.is_staff or request.user.is_superuser):
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+        try:
+            from ..models import AdminChatHistory
+            from collections import OrderedDict
+            limit = int(request.GET.get('limit', 50))
+
+            # Get all history entries
+            history = AdminChatHistory.objects.filter(
+                admin_user=request.user
+            ).order_by('-timestamp')[:limit]
+
+            # Group by session_id
+            sessions = OrderedDict()
+            for chat in history:
+                session_key = chat.session_id or f"single_{chat.id}"
+
+                if session_key not in sessions:
+                    sessions[session_key] = {
+                        'session_id': chat.session_id,
+                        'messages': [],
+                        'first_message': chat.message,
+                        'latest_timestamp': chat.timestamp,
+                        'user_mentioned': chat.user_mentioned
+                    }
+
+                sessions[session_key]['messages'].append({
+                    'id': chat.id,
+                    'message': chat.message,
+                    'response': chat.response,
+                    'user_mentioned': chat.user_mentioned,
+                    'weather_data': chat.weather_data,
+                    'timestamp': chat.timestamp.isoformat()
+                })
+
+                # Update latest timestamp if newer
+                if chat.timestamp > sessions[session_key]['latest_timestamp']:
+                    sessions[session_key]['latest_timestamp'] = chat.timestamp
+
+            # Convert to list format for frontend
+            conversations = []
+            for session_key, session_data in sessions.items():
+                # Sort messages within session by timestamp
+                session_data['messages'].sort(key=lambda x: x['timestamp'])
+
+                conversations.append({
+                    'session_id': session_data['session_id'],
+                    'messages': session_data['messages'],
+                    'first_message': session_data['first_message'],
+                    'timestamp': session_data['latest_timestamp'].isoformat(),
+                    'user_mentioned': session_data['user_mentioned'],
+                    'message_count': len(session_data['messages'])
+                })
+
+            return JsonResponse({'success': True, 'conversations': conversations})
+        except Exception as e:
+            logger.error(f"Admin chat history API error: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    def post(self, request):
+        """Delete a conversation session"""
+        if not (request.user.is_staff or request.user.is_superuser):
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+        try:
+            import json
+            data = json.loads(request.body)
+            session_id = data.get('session_id')
+
+            if not session_id:
+                return JsonResponse({'success': False, 'error': 'session_id is required'}, status=400)
+
+            from ..models import AdminChatHistory
+
+            # Delete all messages in this session
+            deleted_count = AdminChatHistory.objects.filter(
+                admin_user=request.user,
+                session_id=session_id
+            ).delete()[0]
+
+            if deleted_count > 0:
+                logger.info(f"Deleted {deleted_count} messages from session {session_id}")
+                return JsonResponse({'success': True, 'deleted_count': deleted_count})
+            else:
+                return JsonResponse({'success': False, 'error': 'Session not found'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error(f"Delete chat history error: {e}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)

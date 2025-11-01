@@ -19,6 +19,9 @@ from .admin import (
     admin_weather_map,
     admin_users,
     admin_logs,
+    admin_profile,
+    admin_profile_edit,
+    admin_profile_remove_image,
 )
 
 # User views
@@ -47,6 +50,7 @@ from .api import (
     TemperatureAlertAPIView,
     UserLocationAPIView,
     AdminUserLocationsAPIView,
+    AdminChatHistoryAPIView,
 )
 
 __all__ = [
@@ -62,6 +66,9 @@ __all__ = [
     'admin_weather_map',
     'admin_users',
     'admin_logs',
+    'admin_profile',
+    'admin_profile_edit',
+    'admin_profile_remove_image',
     # User
     'user_dashboard',
     'user_chat',
