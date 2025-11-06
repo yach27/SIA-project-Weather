@@ -44,11 +44,11 @@
 
                 <div class="flex items-center space-x-4">
                     <!-- Weather Quick Info -->
-                    <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="hidden md:flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                         </svg>
-                        <span id="current-location">{{ user_location|default:"Getting location..." }}</span>
+                        <span id="current-location" class="text-sm font-medium text-gray-700">--</span>
                     </div>
 
                     <!-- Notifications -->
@@ -154,6 +154,60 @@
 const OPENWEATHER_API_KEY = "{{ OPENWEATHER_API_KEY }}";
 console.log('OPENWEATHER_API_KEY loaded:', OPENWEATHER_API_KEY ? 'Yes (length: ' + OPENWEATHER_API_KEY.length + ')' : 'No');
 
+// Update header location on page load
+async function updateHeaderLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                try {
+                    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`);
+                    const data = await response.json();
+
+                    if (data && data.name) {
+                        const location = `${data.name}, ${data.sys.country}`;
+                        const locationElement = document.getElementById('current-location');
+                        if (locationElement) {
+                            locationElement.textContent = location;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching location:', error);
+                }
+            },
+            function(error) {
+                // Fallback to Manila
+                fetch(`https://api.openweathermap.org/data/2.5/weather?lat=14.5995&lon=120.9842&units=metric&appid=${OPENWEATHER_API_KEY}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.name) {
+                            const location = `${data.name}, ${data.sys.country}`;
+                            const locationElement = document.getElementById('current-location');
+                            if (locationElement) {
+                                locationElement.textContent = location;
+                            }
+                        }
+                    });
+            }
+        );
+    } else {
+        // No geolocation, use fallback
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=14.5995&lon=120.9842&units=metric&appid=${OPENWEATHER_API_KEY}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.name) {
+                    const location = `${data.name}, ${data.sys.country}`;
+                    const locationElement = document.getElementById('current-location');
+                    if (locationElement) {
+                        locationElement.textContent = location;
+                    }
+                }
+            });
+    }
+}
+
 // Mobile menu functionality
 document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -167,6 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     mobileMenuBtn.addEventListener('click', toggleMobileMenu);
     backdrop.addEventListener('click', toggleMobileMenu);
+
+    // Update header location immediately
+    updateHeaderLocation();
 
     // Load weather alert on page load
     loadWeatherAlert();

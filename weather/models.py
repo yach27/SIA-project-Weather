@@ -5,6 +5,9 @@ from django.utils import timezone
 # Add profile_pic field to User model (since it exists in auth_user table)
 User.add_to_class('profile_pic', models.CharField(max_length=255, blank=True, null=True))
 
+# Add middle_name field to User model (since it will exist in auth_user table)
+User.add_to_class('middle_name', models.CharField(max_length=50, blank=True, null=True))
+
 class UserProfile(models.Model):
     """
     Extended profile for Django's default User model

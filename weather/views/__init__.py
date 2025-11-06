@@ -35,6 +35,9 @@ from .user import (
     health_tips,
     weather_alerts,
     user_settings,
+    user_profile,
+    user_profile_edit,
+    user_profile_remove_image,
 )
 
 # API views (Class-Based Views)
@@ -79,6 +82,9 @@ __all__ = [
     'health_tips',
     'weather_alerts',
     'user_settings',
+    'user_profile',
+    'user_profile_edit',
+    'user_profile_remove_image',
 ]
 
 

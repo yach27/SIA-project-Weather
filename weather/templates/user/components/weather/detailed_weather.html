@@ -1,76 +1,75 @@
 <!-- Detailed Weather Information -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-semibold text-gray-900">Detailed Weather Information</h2>
-        <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+<div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">
+                Detailed Weather Information
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Real-time atmospheric conditions</p>
+        </div>
+        <button class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium">
+            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
             Refresh
         </button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Current Location -->
-        <div class="p-4 border border-gray-100 rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">Current Location</span>
-                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                </svg>
+        <div class="group relative bg-white p-6 rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-transparent rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Location</span>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xl font-bold text-gray-900 mb-2" data-weather="location">Detecting...</p>
+                <p class="text-sm text-gray-600 font-medium" data-weather="condition">Loading...</p>
             </div>
-            <p class="text-lg font-bold text-gray-900" data-weather="location">Detecting...</p>
-            <p class="text-sm text-gray-500" data-weather="condition">Loading...</p>
         </div>
 
         <!-- Visibility -->
-        <div class="p-4 border border-gray-100 rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">Visibility</span>
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
+        <div class="group relative bg-white p-6 rounded-xl border-2 border-purple-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-transparent rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Visibility</span>
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 mb-2">
+                    <span data-weather="visibility">--</span> <span class="text-lg text-gray-500">km</span>
+                </p>
+                <p class="text-sm text-gray-600 font-medium" data-weather="visibility-status">Loading...</p>
             </div>
-            <p class="text-2xl font-bold text-gray-900">
-                <span data-weather="visibility">--</span> km
-            </p>
-            <p class="text-sm text-gray-500" data-weather="visibility-status">Loading...</p>
         </div>
 
         <!-- Pressure -->
-        <div class="p-4 border border-gray-100 rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">Pressure</span>
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
+        <div class="group relative bg-white p-6 rounded-xl border-2 border-pink-100 hover:border-pink-300 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-100 to-transparent rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Pressure</span>
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 mb-2">
+                    <span data-weather="pressure">--</span> <span class="text-lg text-gray-500">hPa</span>
+                </p>
+                <p class="text-sm text-gray-600 font-medium" data-weather="pressure-status">Loading...</p>
             </div>
-            <p class="text-2xl font-bold text-gray-900">
-                <span data-weather="pressure">--</span> hPa
-            </p>
-            <p class="text-sm text-gray-500" data-weather="pressure-status">Loading...</p>
-        </div>
-
-        <!-- Sunrise -->
-        <div class="p-4 border border-gray-100 rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">Sunrise</span>
-                <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                </svg>
-            </div>
-            <p class="text-2xl font-bold text-gray-900" data-weather="sunrise">--:--</p>
-            <p class="text-sm text-gray-500">Morning</p>
-        </div>
-
-        <!-- Sunset -->
-        <div class="p-4 border border-gray-100 rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">Sunset</span>
-                <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                </svg>
-            </div>
-            <p class="text-2xl font-bold text-gray-900" data-weather="sunset">--:--</p>
-            <p class="text-sm text-gray-500">Evening</p>
         </div>
     </div>
 </div>

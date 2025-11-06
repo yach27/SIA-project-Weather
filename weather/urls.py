@@ -55,5 +55,8 @@ urlpatterns = [
     path('health/', views.health_tips, name='health_tips'),
     path('alerts/', views.weather_alerts, name='weather_alerts'),
     path('settings/', views.user_settings, name='user_settings'),
+    path('profile/', views.user_profile, name='user_profile'),
+    path('profile/edit/', views.user_profile_edit, name='user_profile_edit'),
+    path('profile/remove-image/', views.user_profile_remove_image, name='user_profile_remove_image'),
     path('logout/', views.user_logout, name='user_logout'),
 ]

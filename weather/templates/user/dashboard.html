@@ -63,43 +63,37 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// Dashboard mini map
+const DEFAULT_LOCATION = { lat: 14.5995, lon: 120.9842 }; // Manila, Philippines
 let dashboardMap;
 let userLocation = null;
 let weatherData = null;
-// OPENWEATHER_API_KEY is already declared in base.html
 
 // Get user's current location and fetch weather data
 async function getUserLocationAndWeather() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            async function(position) {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                userLocation = { lat, lon };
-
-                // Fetch weather data
-                await fetchWeatherData(lat, lon);
-
-                // Update map center
-                if (dashboardMap) {
-                    dashboardMap.setView([lat, lon], 10);
-                    L.marker([lat, lon]).addTo(dashboardMap)
-                        .bindPopup(`<b>Your Location</b><br>${weatherData?.location || 'Current Location'}`)
-                        .openPopup();
-                }
-            },
-            function(error) {
-                console.error('Geolocation error:', error.message);
-                // Fallback to default location (Manila, Philippines)
-                fetchWeatherData(14.5995, 120.9842);
-            }
-        );
-    } else {
-        console.log('Geolocation not supported');
-        // Fallback to default location
-        fetchWeatherData(14.5995, 120.9842);
+    if (!navigator.geolocation) {
+        fetchWeatherData(DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lon);
+        return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            userLocation = {
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+            };
+
+            await fetchWeatherData(userLocation.lat, userLocation.lon);
+
+            if (dashboardMap) {
+                dashboardMap.setView([userLocation.lat, userLocation.lon], 10);
+                L.marker([userLocation.lat, userLocation.lon])
+                    .addTo(dashboardMap)
+                    .bindPopup(`<b>Your Location</b><br>${weatherData?.location || 'Current Location'}`)
+                    .openPopup();
+            }
+        },
+        () => fetchWeatherData(DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lon)
+    );
 }
 
 // Fetch weather data from OpenWeather API
@@ -108,7 +102,7 @@ async function fetchWeatherData(lat, lon) {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`);
         const data = await response.json();
 
-        if (data && data.main) {
+        if (data?.main) {
             weatherData = {
                 location: `${data.name}, ${data.sys.country}`,
                 temperature: Math.round(data.main.temp),
@@ -116,30 +110,15 @@ async function fetchWeatherData(lat, lon) {
                 condition: data.weather[0].description,
                 condition_main: data.weather[0].main,
                 humidity: data.main.humidity,
-                wind_speed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
+                wind_speed: Math.round(data.wind.speed * 3.6),
                 wind_deg: data.wind.deg,
                 pressure: data.main.pressure,
-                visibility: (data.visibility / 1000).toFixed(1), // Convert m to km
-                sunrise: new Date(data.dt * 1000 + data.timezone * 1000).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: 'UTC'
-                }),
-                sunset: new Date((data.sys.sunset * 1000) + (data.timezone * 1000)).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: 'UTC'
-                }),
+                visibility: (data.visibility / 1000).toFixed(1),
                 coordinates: { lat: data.coord.lat, lon: data.coord.lon }
             };
 
-            // Fetch air quality data
             await fetchAirQualityData(lat, lon);
-
-            // Update dashboard UI
             updateDashboardUI(weatherData);
-
-            // Fetch AI-generated health tips
             await fetchHealthTips(weatherData);
         }
     } catch (error) {
@@ -153,21 +132,13 @@ async function fetchAirQualityData(lat, lon) {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`);
         const data = await response.json();
 
-        if (data && data.list && data.list.length > 0) {
-            const airQuality = data.list[0];
-            const aqi = airQuality.main.aqi; // Air Quality Index (1-5)
-            const components = airQuality.components;
-
-            // Add air quality data to weatherData
+        if (data?.list?.[0]) {
+            const aqi = data.list[0].main.aqi;
             weatherData.air_quality = aqi;
             weatherData.air_quality_status = getAirQualityStatus(aqi);
-            weatherData.air_quality_components = components;
-
-            console.log('Air quality data:', {aqi, status: weatherData.air_quality_status, components});
+            weatherData.air_quality_components = data.list[0].components;
         }
     } catch (error) {
-        console.error('Error fetching air quality:', error);
-        // Set default values if air quality fetch fails
         weatherData.air_quality = '--';
         weatherData.air_quality_status = 'Unavailable';
     }
@@ -175,44 +146,28 @@ async function fetchAirQualityData(lat, lon) {
 
 // Fetch AI-generated health tips
 async function fetchHealthTips(weatherData) {
-    console.log('Fetching AI health tips with data:', weatherData);
-
     try {
-        const requestData = {
-            temperature: weatherData.temperature,
-            feels_like: weatherData.feels_like,
-            condition: weatherData.condition,
-            humidity: weatherData.humidity,
-            wind_speed: weatherData.wind_speed,
-            air_quality: weatherData.air_quality || 1
-        };
-
-        console.log('Sending health tips request:', requestData);
-
         const response = await fetch('/api/health-tips/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify(requestData)
+            body: JSON.stringify({
+                temperature: weatherData.temperature,
+                feels_like: weatherData.feels_like,
+                condition: weatherData.condition,
+                humidity: weatherData.humidity,
+                wind_speed: weatherData.wind_speed,
+                air_quality: weatherData.air_quality || 1
+            })
         });
-
-        console.log('Health tips response status:', response.status);
 
         if (response.ok) {
             const data = await response.json();
-            console.log('Health tips response data:', data);
-
-            if (data.success && data.tips && data.tips.length > 0) {
-                console.log('Displaying', data.tips.length, 'AI-generated tips');
+            if (data.success && data.tips?.length > 0) {
                 displayHealthTips(data.tips);
-            } else {
-                console.warn('No tips received from API');
             }
-        } else {
-            const errorText = await response.text();
-            console.error('Health tips API error:', response.status, errorText);
         }
     } catch (error) {
         console.error('Error fetching health tips:', error);
@@ -262,99 +217,40 @@ function displayHealthTips(tips) {
     }).join('');
 
     healthTipsContainer.innerHTML = tipsHTML;
-    console.log('Health tips updated:', tips);
 }
 
 // Get CSRF token for POST requests
 function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+    if (!document.cookie) return null;
+
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith(name + '='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
 }
 
 // Update dashboard UI with weather data
 function updateDashboardUI(data) {
-    // Update location
-    const locationElements = document.querySelectorAll('[data-weather="location"]');
-    locationElements.forEach(el => el.textContent = data.location);
+    const updates = {
+        'location': data.location,
+        'temperature': data.temperature,
+        'feels-like': data.feels_like,
+        'humidity': data.humidity,
+        'humidity-status': getHumidityStatus(data.humidity),
+        'wind-speed': data.wind_speed,
+        'wind-direction': getWindDirection(data.wind_deg),
+        'pressure': data.pressure,
+        'pressure-status': getPressureStatus(data.pressure),
+        'visibility': data.visibility,
+        'visibility-status': getVisibilityStatus(data.visibility),
+        'condition': data.condition.charAt(0).toUpperCase() + data.condition.slice(1),
+        'air-quality': data.air_quality,
+        'air-quality-status': data.air_quality_status
+    };
 
-    // Update temperature
-    const tempElement = document.querySelector('[data-weather="temperature"]');
-    if (tempElement) tempElement.textContent = data.temperature;
-
-    const feelsLikeElement = document.querySelector('[data-weather="feels-like"]');
-    if (feelsLikeElement) feelsLikeElement.textContent = data.feels_like;
-
-    // Update humidity
-    const humidityElement = document.querySelector('[data-weather="humidity"]');
-    if (humidityElement) humidityElement.textContent = data.humidity;
-
-    const humidityStatusElement = document.querySelector('[data-weather="humidity-status"]');
-    if (humidityStatusElement) {
-        humidityStatusElement.textContent = getHumidityStatus(data.humidity);
-    }
-
-    // Update wind speed
-    const windSpeedElement = document.querySelector('[data-weather="wind-speed"]');
-    if (windSpeedElement) windSpeedElement.textContent = data.wind_speed;
-
-    const windDirectionElement = document.querySelector('[data-weather="wind-direction"]');
-    if (windDirectionElement) {
-        windDirectionElement.textContent = getWindDirection(data.wind_deg);
-    }
-
-    // Update pressure
-    const pressureElement = document.querySelector('[data-weather="pressure"]');
-    if (pressureElement) pressureElement.textContent = data.pressure;
-
-    const pressureStatusElement = document.querySelector('[data-weather="pressure-status"]');
-    if (pressureStatusElement) {
-        pressureStatusElement.textContent = getPressureStatus(data.pressure);
-    }
-
-    // Update visibility
-    const visibilityElement = document.querySelector('[data-weather="visibility"]');
-    if (visibilityElement) visibilityElement.textContent = data.visibility;
-
-    const visibilityStatusElement = document.querySelector('[data-weather="visibility-status"]');
-    if (visibilityStatusElement) {
-        visibilityStatusElement.textContent = getVisibilityStatus(data.visibility);
-    }
-
-    // Update sunrise/sunset
-    const sunriseElement = document.querySelector('[data-weather="sunrise"]');
-    if (sunriseElement) sunriseElement.textContent = data.sunrise;
-
-    const sunsetElement = document.querySelector('[data-weather="sunset"]');
-    if (sunsetElement) sunsetElement.textContent = data.sunset;
-
-    // Update condition
-    const conditionElement = document.querySelector('[data-weather="condition"]');
-    if (conditionElement) {
-        conditionElement.textContent = data.condition.charAt(0).toUpperCase() + data.condition.slice(1);
-    }
-
-    // Update air quality
-    const airQualityElement = document.querySelector('[data-weather="air-quality"]');
-    if (airQualityElement && data.air_quality) {
-        airQualityElement.textContent = data.air_quality;
-    }
-
-    const airQualityStatusElement = document.querySelector('[data-weather="air-quality-status"]');
-    if (airQualityStatusElement && data.air_quality_status) {
-        airQualityStatusElement.textContent = data.air_quality_status;
-    }
-
-    console.log('Dashboard updated with real weather data:', data);
+    Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined) return;
+        const elements = document.querySelectorAll(`[data-weather="${key}"]`);
+        elements.forEach(el => el.textContent = value);
+    });
 }
 
 // Helper functions
@@ -418,27 +314,21 @@ function initDashboardMap() {
     });
 }
 
-// Auto-refresh weather data every 5 minutes
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize dashboard map
+// Initialize dashboard on page load
+document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('dashboard-map')) {
         initDashboardMap();
     }
 
-    // Get user location and weather data
     getUserLocationAndWeather();
 
     // Auto-refresh every 5 minutes
     setInterval(() => {
-        console.log('Refreshing weather data...');
-        if (userLocation) {
-            fetchWeatherData(userLocation.lat, userLocation.lon);
-        } else {
-            getUserLocationAndWeather();
-        }
-    }, 300000); // 5 minutes
+        const { lat, lon } = userLocation || DEFAULT_LOCATION;
+        fetchWeatherData(lat, lon);
+    }, 300000);
 
-    // Add click handlers for alert dismissal
+    // Alert dismissal handlers
     document.querySelectorAll('[data-dismiss-alert]').forEach(button => {
         button.addEventListener('click', function() {
             this.closest('.border-l-4').style.display = 'none';

@@ -90,7 +90,7 @@ const WeatherData = {
         MapUtils.updateElement('precipitation', currentData.rain ? `${currentData.rain['1h'] || 0} mm` : '0 mm');
         MapUtils.updateElement('cloud-cover', `${currentData.clouds.all}%`);
 
-        // UV Index - Estimate based on time and weather
+        // UV Index - Use calculated estimate based on location and weather
         const uvIndex = this.calculateUVIndex(currentData);
         MapUtils.updateElement('uv-index', uvIndex);
 
@@ -160,35 +160,44 @@ const WeatherData = {
     },
 
     /**
-     * Calculate UV Index based on time and weather
+     * Calculate UV Index based on location and weather conditions
      */
     calculateUVIndex(currentData) {
-        const now = new Date();
-        const hour = now.getHours();
         const clouds = currentData.clouds?.all || 0;
+        const lat = currentData.coord?.lat || 0;
+        const absLat = Math.abs(lat);
 
-        // Night time - no UV
-        if (hour < 6 || hour > 18) {
-            return '0 (Low)';
+        // Base UV by latitude (assume midday for current conditions)
+        let baseUV = 0;
+
+        // Tropical regions (0-23°) - High UV
+        if (absLat < 23) {
+            baseUV = 7;
+        }
+        // Subtropical (23-40°) - Moderate to High UV
+        else if (absLat < 40) {
+            baseUV = 5;
+        }
+        // Temperate (40-66°) - Moderate UV
+        else if (absLat < 66) {
+            baseUV = 3;
+        }
+        // Polar (66°+) - Low UV
+        else {
+            baseUV = 2;
         }
 
-        // Base UV by hour (simple model)
-        let uv = 0;
-        if (hour >= 11 && hour <= 13) {
-            uv = 6; // Peak midday
-        } else if (hour >= 9 && hour <= 15) {
-            uv = 4; // Morning/afternoon
-        } else {
-            uv = 2; // Early/late
-        }
+        // Reduce by cloud cover (heavy clouds can reduce UV by 50-80%)
+        const cloudFactor = 1 - (clouds / 150);
+        let uv = Math.round(baseUV * cloudFactor);
 
-        // Reduce by cloud cover (50% clouds = 50% reduction)
-        uv = uv * (1 - (clouds / 200));
-        uv = Math.max(0, Math.round(uv));
+        // Ensure UV is within realistic range
+        uv = Math.min(11, Math.max(1, uv));
 
-        // Get level
+        // Get level description
         let level = 'Low';
-        if (uv >= 8) level = 'Very High';
+        if (uv >= 11) level = 'Extreme';
+        else if (uv >= 8) level = 'Very High';
         else if (uv >= 6) level = 'High';
         else if (uv >= 3) level = 'Moderate';
 
