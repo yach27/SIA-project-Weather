@@ -9,11 +9,16 @@ from .views import (
     CurrentWeatherAPIView,
     WeatherForecastAPIView,
     SearchLocationsAPIView,
-    TemperatureAlertAPIView,
-    UserLocationAPIView,
-    AdminUserLocationsAPIView,
-    AdminChatHistoryAPIView,
+    TemperatureAlertAPIView
 )
+# Optional: Import class-based views (uncomment to use)
+# from .views_class_based import (
+#     DashboardView,
+#     ChatView,
+#     HealthTipsView,
+#     AdminDashboardView,
+#     AdminChatView
+# )
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -28,8 +33,6 @@ urlpatterns = [
     path('admin-users/', views.admin_users, name='admin_users'),
     path('admin-logs/', views.admin_logs, name='admin_logs'),
     path('admin-profile/', views.admin_profile, name='admin_profile'),
-    path('admin-profile/edit/', views.admin_profile_edit, name='admin_profile_edit'),
-    path('admin-profile/remove-image/', views.admin_profile_remove_image, name='admin_profile_remove_image'),
 
     # API URLs - Using Class-Based Views (Django Best Practice)
     path('api/chatbot/', ChatbotAPIView.as_view(), name='chatbot_api'),
@@ -37,13 +40,12 @@ urlpatterns = [
     path('api/weather/', WeatherDataAPIView.as_view(), name='weather_data_api'),
     path('api/location/search/', LocationSearchAPIView.as_view(), name='location_search_api'),
     path('api/dismiss-alert/', DismissAlertAPIView.as_view(), name='dismiss_alert_api'),
+
+    # Weather API endpoints
     path('api/weather/current/', CurrentWeatherAPIView.as_view(), name='current_weather_api'),
     path('api/weather/forecast/', WeatherForecastAPIView.as_view(), name='weather_forecast_api'),
     path('api/weather/search/', SearchLocationsAPIView.as_view(), name='search_locations_api'),
     path('api/temperature-alert/', TemperatureAlertAPIView.as_view(), name='temperature_alert_api'),
-    path('api/user-location/', UserLocationAPIView.as_view(), name='user_location_api'),
-    path('api/admin/user-locations/', AdminUserLocationsAPIView.as_view(), name='admin_user_locations_api'),
-    path('api/admin/chat-history/', AdminChatHistoryAPIView.as_view(), name='admin_chat_history_api'),
 
     # User URLs
     path('dashboard/', views.user_dashboard, name='user_dashboard'),
@@ -56,7 +58,5 @@ urlpatterns = [
     path('alerts/', views.weather_alerts, name='weather_alerts'),
     path('settings/', views.user_settings, name='user_settings'),
     path('profile/', views.user_profile, name='user_profile'),
-    path('profile/edit/', views.user_profile_edit, name='user_profile_edit'),
-    path('profile/remove-image/', views.user_profile_remove_image, name='user_profile_remove_image'),
     path('logout/', views.user_logout, name='user_logout'),
 ]

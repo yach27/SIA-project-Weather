@@ -20,8 +20,6 @@ from .admin import (
     admin_users,
     admin_logs,
     admin_profile,
-    admin_profile_edit,
-    admin_profile_remove_image,
 )
 
 # User views
@@ -36,8 +34,6 @@ from .user import (
     weather_alerts,
     user_settings,
     user_profile,
-    user_profile_edit,
-    user_profile_remove_image,
 )
 
 # API views (Class-Based Views)
@@ -54,6 +50,7 @@ from .api import (
     UserLocationAPIView,
     AdminUserLocationsAPIView,
     AdminChatHistoryAPIView,
+    
 )
 
 __all__ = [
@@ -70,8 +67,6 @@ __all__ = [
     'admin_users',
     'admin_logs',
     'admin_profile',
-    'admin_profile_edit',
-    'admin_profile_remove_image',
     # User
     'user_dashboard',
     'user_chat',
@@ -83,8 +78,6 @@ __all__ = [
     'weather_alerts',
     'user_settings',
     'user_profile',
-    'user_profile_edit',
-    'user_profile_remove_image',
 ]
 
 
