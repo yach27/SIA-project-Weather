@@ -7,8 +7,10 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db import models
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.contrib import messages
 from datetime import timedelta
-from ..models import ActivityLog, SystemLog
+from ..models import ActivityLog, SystemLog, UserLocation, ChatMessage
 
 
 def admin_dashboard(request):
@@ -312,3 +314,145 @@ def admin_profile_remove_image(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+# User Management Actions
+def admin_get_user_details(request, user_id):
+    """Get user details for viewing in modal"""
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = User.objects.get(id=user_id)
+
+        # Get user's current location if exists
+        location = None
+        coordinates = None
+        try:
+            user_location = UserLocation.objects.filter(user=user).order_by('-timestamp').first()
+            if user_location:
+                location = user_location.location_name or f"{user_location.latitude}, {user_location.longitude}"
+                coordinates = f"{user_location.latitude:.4f}, {user_location.longitude:.4f}"
+        except:
+            pass
+
+        user_data = {
+            'success': True,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'first_name': user.first_name or '',
+                'middle_name': user.middle_name if hasattr(user, 'middle_name') else '',
+                'last_name': user.last_name or '',
+                'email': user.email,
+                'phone_number': user.phone_number if hasattr(user, 'phone_number') else '',
+                'is_active': user.is_active,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
+                'date_joined': user.date_joined.strftime('%B %d, %Y'),
+                'last_login': user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never',
+                'location': location or '--',
+                'coordinates': coordinates or '--',
+            }
+        }
+        return JsonResponse(user_data)
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def admin_edit_user(request, user_id):
+    """Edit user information"""
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
+    try:
+        import json
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = User.objects.get(id=user_id)
+
+        data = json.loads(request.body)
+
+        # Update user fields
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+
+        # Update custom fields if they exist
+        if hasattr(user, 'middle_name'):
+            user.middle_name = data.get('middle_name', user.middle_name)
+        if hasattr(user, 'phone_number'):
+            user.phone_number = data.get('phone_number', user.phone_number)
+
+        # Update role
+        role = data.get('role', 'user')
+        user.is_staff = role == 'admin'
+        user.is_superuser = role == 'admin'
+
+        # Update status
+        is_active = data.get('is_active', 'true')
+        user.is_active = is_active == 'true' or is_active == True
+
+        # Update password if provided
+        new_password = data.get('new_password')
+        if new_password and new_password.strip():
+            user.set_password(new_password)
+
+        user.save()
+
+        # Log the action
+        ActivityLog.objects.create(
+            user=request.user,
+            activity_type='user_edit',
+            description=f'Edited user: {user.username}'
+        )
+
+        return JsonResponse({'success': True, 'message': 'User updated successfully'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def admin_delete_user(request, user_id):
+    """Delete a user account"""
+    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = User.objects.get(id=user_id)
+
+        # Prevent self-deletion
+        if user.id == request.user.id:
+            return JsonResponse({'success': False, 'error': 'Cannot delete your own account'}, status=400)
+
+        username = user.username
+
+        # Log the action before deleting
+        ActivityLog.objects.create(
+            user=request.user,
+            activity_type='user_delete',
+            description=f'Deleted user: {username}'
+        )
+
+        # Delete the user
+        user.delete()
+
+        return JsonResponse({'success': True, 'message': f'User {username} deleted successfully'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

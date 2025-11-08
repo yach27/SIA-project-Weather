@@ -31,8 +31,13 @@ urlpatterns = [
     path('admin-alerts/', views.admin_weather_alerts, name='admin_weather_alerts'),
     path('admin-map/', views.admin_weather_map, name='admin_weather_map'),
     path('admin-users/', views.admin_users, name='admin_users'),
+    path('admin-users/<int:user_id>/', views.admin_get_user_details, name='admin_get_user_details'),
+    path('admin-users/<int:user_id>/edit/', views.admin_edit_user, name='admin_edit_user'),
+    path('admin-users/<int:user_id>/delete/', views.admin_delete_user, name='admin_delete_user'),
     path('admin-logs/', views.admin_logs, name='admin_logs'),
     path('admin-profile/', views.admin_profile, name='admin_profile'),
+    path('admin-profile/edit/', views.admin_profile_edit, name='admin_profile_edit'),
+    path('admin-profile/remove-image/', views.admin_profile_remove_image, name='admin_profile_remove_image'),
 
     # API URLs - Using Class-Based Views (Django Best Practice)
     path('api/chatbot/', ChatbotAPIView.as_view(), name='chatbot_api'),
@@ -58,5 +63,7 @@ urlpatterns = [
     path('alerts/', views.weather_alerts, name='weather_alerts'),
     path('settings/', views.user_settings, name='user_settings'),
     path('profile/', views.user_profile, name='user_profile'),
+    path('profile/edit/', views.user_profile_edit, name='user_profile_edit'),
+    path('profile/remove-image/', views.user_profile_remove_image, name='user_profile_remove_image'),
     path('logout/', views.user_logout, name='user_logout'),
 ]
