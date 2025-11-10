@@ -15,16 +15,15 @@ from .auth import (
 from .admin import (
     admin_dashboard,
     admin_chat,
-    admin_weather_alerts,
     admin_weather_map,
     admin_users,
+    admin_get_user_details,
+    admin_edit_user,
+    admin_delete_user,
     admin_logs,
     admin_profile,
     admin_profile_edit,
     admin_profile_remove_image,
-    admin_get_user_details,
-    admin_edit_user,
-    admin_delete_user,
 )
 
 # User views
@@ -36,7 +35,6 @@ from .user import (
     weather_map,
     weather_history,
     health_tips,
-    weather_alerts,
     user_settings,
     user_profile,
     user_profile_edit,
@@ -57,7 +55,8 @@ from .api import (
     UserLocationAPIView,
     AdminUserLocationsAPIView,
     AdminChatHistoryAPIView,
-    
+    SendWeatherAlertAPIView,
+    UserNotificationsAPIView,
 )
 
 __all__ = [
@@ -69,16 +68,15 @@ __all__ = [
     # Admin
     'admin_dashboard',
     'admin_chat',
-    'admin_weather_alerts',
     'admin_weather_map',
     'admin_users',
+    'admin_get_user_details',
+    'admin_edit_user',
+    'admin_delete_user',
     'admin_logs',
     'admin_profile',
     'admin_profile_edit',
     'admin_profile_remove_image',
-    'admin_get_user_details',
-    'admin_edit_user',
-    'admin_delete_user',
     # User
     'user_dashboard',
     'user_chat',
@@ -87,11 +85,25 @@ __all__ = [
     'weather_map',
     'weather_history',
     'health_tips',
-    'weather_alerts',
     'user_settings',
     'user_profile',
     'user_profile_edit',
     'user_profile_remove_image',
+    # API Views
+    'ChatbotAPIView',
+    'HealthTipsAPIView',
+    'WeatherDataAPIView',
+    'LocationSearchAPIView',
+    'DismissAlertAPIView',
+    'CurrentWeatherAPIView',
+    'WeatherForecastAPIView',
+    'SearchLocationsAPIView',
+    'TemperatureAlertAPIView',
+    'UserLocationAPIView',
+    'AdminUserLocationsAPIView',
+    'AdminChatHistoryAPIView',
+    'SendWeatherAlertAPIView',
+    'UserNotificationsAPIView',
 ]
 
 

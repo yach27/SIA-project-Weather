@@ -96,15 +96,6 @@ def health_tips(request):
     return render(request, 'user/health_tips.html', context)
 
 
-def weather_alerts(request):
-    """Weather alerts and warnings"""
-    if not request.user.is_authenticated:
-        return redirect('signin')
-
-    context = {}
-    return render(request, 'user/weather_alerts.html', context)
-
-
 def user_settings(request):
     """User settings and preferences"""
     if not request.user.is_authenticated:

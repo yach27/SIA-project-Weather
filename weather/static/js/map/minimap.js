@@ -128,8 +128,17 @@ class UserLocationsMiniMap {
     }
 }
 
+// Prevent multiple initializations
+let minimapInitialized = false;
+
 // Initialize on page load
 function initMiniMap() {
+    // Prevent double initialization
+    if (minimapInitialized) {
+        console.log('Mini map already initialized, skipping...');
+        return;
+    }
+
     const container = document.getElementById('user-locations-minimap');
     console.log('Mini map initialization check:', {
         containerExists: !!container,
@@ -139,10 +148,20 @@ function initMiniMap() {
     if (container) {
         console.log('Initializing user locations mini map...');
         try {
+            // Check if map container already has Leaflet instance
+            if (container._leaflet_id) {
+                console.log('Map container already initialized, skipping...');
+                minimapInitialized = true;
+                return;
+            }
+
             new UserLocationsMiniMap();
+            minimapInitialized = true;
             console.log('Mini map initialized successfully');
         } catch (error) {
             console.error('Error initializing mini map:', error);
+            // Reset flag on error so retry can happen
+            minimapInitialized = false;
         }
     }
 }
@@ -154,6 +173,3 @@ if (document.readyState === 'loading') {
     // DOM already loaded
     initMiniMap();
 }
-
-// Also try after a brief delay as fallback
-setTimeout(initMiniMap, 1000);

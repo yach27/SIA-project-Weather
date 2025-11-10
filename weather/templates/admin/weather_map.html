@@ -14,6 +14,9 @@
     {% include 'admin/components/map/weather_controls.html' %}
     {% include 'admin/components/map/map_container.html' %}
 </div>
+
+<!-- Weather Alert Modal Component -->
+{% include 'admin/components/map/weather_alert_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -34,6 +37,7 @@ window.OPENWEATHER_API_KEY_FROM_ENV = "{{ OPENWEATHER_API_KEY }}";
 <script src="{% static 'js/map/weather_data.js' %}?v={{ cache_bust }}"></script>
 <script src="{% static 'js/map/map_controls.js' %}?v={{ cache_bust }}"></script>
 <script src="{% static 'js/map/admin_features.js' %}?v={{ cache_bust }}"></script>
+<script src="{% static 'js/map/weather_alert_modal.js' %}?v={{ cache_bust }}"></script>
 <script src="{% static 'js/map/admin_user_markers.js' %}?v={{ cache_bust }}"></script>
 <script src="{% static 'js/map/minimap.js' %}?v={{ cache_bust }}"></script>
 <script src="{% static 'js/map/map_init.js' %}?v={{ cache_bust }}"></script>

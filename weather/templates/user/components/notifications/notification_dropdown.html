@@ -1,0 +1,42 @@
+<!-- Notification Dropdown -->
+<div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl z-[9999] border border-gray-200 overflow-hidden">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
+        <div class="flex items-center justify-between">
+            <h3 class="text-white font-semibold text-sm">Weather Notifications</h3>
+            <span id="notification-badge-dropdown" class="bg-white text-blue-600 text-xs font-bold px-2 py-1 rounded-full">0</span>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div id="notifications-list" class="max-h-96 overflow-y-auto">
+        <!-- Loading State -->
+        <div id="notifications-loading" class="flex items-center justify-center py-8">
+            <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="notifications-empty" class="hidden flex flex-col items-center justify-center py-8 px-4">
+            <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <p class="text-gray-500 text-sm font-medium">No new notifications</p>
+            <p class="text-gray-400 text-xs mt-1">You're all caught up!</p>
+        </div>
+
+        <!-- Notifications Container -->
+        <div id="notifications-container" class="hidden divide-y divide-gray-100">
+            <!-- Notifications will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-50 px-4 py-2 border-t border-gray-200">
+        <button
+            id="mark-all-read-btn"
+            class="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-1 hover:bg-blue-50 rounded transition-colors"
+        >
+            Mark all as read
+        </button>
+    </div>
+</div>

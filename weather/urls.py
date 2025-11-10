@@ -9,7 +9,11 @@ from .views import (
     CurrentWeatherAPIView,
     WeatherForecastAPIView,
     SearchLocationsAPIView,
-    TemperatureAlertAPIView
+    TemperatureAlertAPIView,
+    AdminUserLocationsAPIView,
+    AdminChatHistoryAPIView,
+    SendWeatherAlertAPIView,
+    UserNotificationsAPIView
 )
 # Optional: Import class-based views (uncomment to use)
 # from .views_class_based import (
@@ -28,7 +32,6 @@ urlpatterns = [
     # Admin URLs
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-chat/', views.admin_chat, name='admin_chat'),
-    path('admin-alerts/', views.admin_weather_alerts, name='admin_weather_alerts'),
     path('admin-map/', views.admin_weather_map, name='admin_weather_map'),
     path('admin-users/', views.admin_users, name='admin_users'),
     path('admin-users/<int:user_id>/', views.admin_get_user_details, name='admin_get_user_details'),
@@ -52,6 +55,14 @@ urlpatterns = [
     path('api/weather/search/', SearchLocationsAPIView.as_view(), name='search_locations_api'),
     path('api/temperature-alert/', TemperatureAlertAPIView.as_view(), name='temperature_alert_api'),
 
+    # Admin API endpoints
+    path('api/admin/user-locations/', AdminUserLocationsAPIView.as_view(), name='admin_user_locations_api'),
+    path('api/admin/chat-history/', AdminChatHistoryAPIView.as_view(), name='admin_chat_history_api'),
+    path('api/admin/send-weather-alert/', SendWeatherAlertAPIView.as_view(), name='send_weather_alert_api'),
+
+    # User API endpoints
+    path('api/notifications/', UserNotificationsAPIView.as_view(), name='user_notifications_api'),
+
     # User URLs
     path('dashboard/', views.user_dashboard, name='user_dashboard'),
     path('chat/', views.user_chat, name='user_chat'),
@@ -60,7 +71,6 @@ urlpatterns = [
     path('map/', views.weather_map, name='weather_map'),
     path('history/', views.weather_history, name='weather_history'),
     path('health/', views.health_tips, name='health_tips'),
-    path('alerts/', views.weather_alerts, name='weather_alerts'),
     path('settings/', views.user_settings, name='user_settings'),
     path('profile/', views.user_profile, name='user_profile'),
     path('profile/edit/', views.user_profile_edit, name='user_profile_edit'),

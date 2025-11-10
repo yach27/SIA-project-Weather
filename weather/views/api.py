@@ -742,3 +742,179 @@ class AdminChatHistoryAPIView(LoginRequiredMixin, View):
         except Exception as e:
             logger.error(f"Delete chat history error: {e}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+class SendWeatherAlertAPIView(LoginRequiredMixin, View):
+    """API endpoint to send weather alerts from admin to users"""
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request):
+        """Send weather alert to a specific user"""
+        if not (request.user.is_staff or request.user.is_superuser):
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+        try:
+            from ..models import UserWeatherAlert
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+
+            data = json.loads(request.body)
+            username = data.get('username')
+            email = data.get('email')
+            alert_type = data.get('alert_type', 'info')
+            title = data.get('title', 'Weather Alert')
+            message = data.get('message', '')
+            temperature = data.get('temperature')
+            weather_condition = data.get('weather_condition')
+            location = data.get('location')
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
+
+            # Validate required fields
+            if not (username or email):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Username or email is required'
+                }, status=400)
+
+            if not message:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Message is required'
+                }, status=400)
+
+            # Find the recipient user
+            try:
+                if email:
+                    recipient = User.objects.get(email=email)
+                else:
+                    recipient = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'User not found: {username or email}'
+                }, status=404)
+
+            # Create the weather alert
+            alert = UserWeatherAlert.objects.create(
+                recipient=recipient,
+                sent_by=request.user,
+                alert_type=alert_type,
+                title=title,
+                message=message,
+                temperature=temperature,
+                weather_condition=weather_condition,
+                location=location,
+                latitude=latitude,
+                longitude=longitude
+            )
+
+            logger.info(f"Weather alert sent from {request.user.username} to {recipient.username}")
+
+            return JsonResponse({
+                'success': True,
+                'message': f'Weather alert sent to {recipient.username}',
+                'alert_id': alert.id
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid JSON data'
+            }, status=400)
+        except Exception as e:
+            logger.error(f"Send weather alert error: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to send weather alert'
+            }, status=500)
+
+
+class UserNotificationsAPIView(LoginRequiredMixin, View):
+    """API endpoint to fetch user weather alert notifications"""
+
+    def get(self, request):
+        """Get unread notifications for the current user"""
+        try:
+            from ..models import UserWeatherAlert
+
+            # Get unread notifications
+            notifications = UserWeatherAlert.objects.filter(
+                recipient=request.user,
+                is_read=False
+            ).order_by('-sent_at')[:10]
+
+            notification_list = []
+            for notif in notifications:
+                notification_list.append({
+                    'id': notif.id,
+                    'title': notif.title,
+                    'message': notif.message,
+                    'alert_type': notif.alert_type,
+                    'temperature': float(notif.temperature) if notif.temperature else None,
+                    'weather_condition': notif.weather_condition,
+                    'location': notif.location,
+                    'sent_at': notif.sent_at.isoformat(),
+                    'sent_by': notif.sent_by.username if notif.sent_by else 'System'
+                })
+
+            return JsonResponse({
+                'success': True,
+                'notifications': notification_list,
+                'unread_count': len(notification_list)
+            })
+
+        except Exception as e:
+            logger.error(f"User notifications API error: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to fetch notifications'
+            }, status=500)
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request):
+        """Mark notification as read"""
+        try:
+            from ..models import UserWeatherAlert
+            from django.utils import timezone
+
+            data = json.loads(request.body)
+            notification_id = data.get('notification_id')
+
+            if not notification_id:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Notification ID is required'
+                }, status=400)
+
+            notification = UserWeatherAlert.objects.get(
+                id=notification_id,
+                recipient=request.user
+            )
+
+            notification.is_read = True
+            notification.read_at = timezone.now()
+            notification.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Notification marked as read'
+            })
+
+        except UserWeatherAlert.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Notification not found'
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Mark notification read error: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to mark notification as read'
+            }, status=500)

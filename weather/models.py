@@ -285,3 +285,39 @@ class AdminChatHistory(models.Model):
 
     def __str__(self):
         return f"{self.admin_user.username} - {self.timestamp}"
+
+
+class UserWeatherAlert(models.Model):
+    """
+    Store individual weather alerts sent from admin map to specific users
+    """
+    ALERT_TYPES = (
+        ('danger', 'Danger'),
+        ('warning', 'Warning'),
+        ('info', 'Info'),
+    )
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='weather_notifications')
+    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sent_weather_alerts')
+    alert_type = models.CharField(max_length=10, choices=ALERT_TYPES, default='info')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+
+    # Weather data at time of alert
+    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    weather_condition = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True, null=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    # Delivery tracking
+    is_read = models.BooleanField(default=False)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'user_weather_alerts'
+        ordering = ['-sent_at']
+
+    def __str__(self):
+        return f"Alert to {self.recipient.username} - {self.title}"

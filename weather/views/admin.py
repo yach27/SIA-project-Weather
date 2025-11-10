@@ -81,15 +81,6 @@ def admin_chat(request):
     return render(request, 'admin/chat.html', context)
 
 
-def admin_weather_alerts(request):
-    """Admin weather alerts management"""
-    if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
-        return redirect('signin')
-
-    context = {}
-    return render(request, 'admin/weather_alerts.html', context)
-
-
 def admin_weather_map(request):
     """Admin weather map view"""
     if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
