@@ -319,15 +319,13 @@ def admin_get_user_details(request, user_id):
         user = User.objects.get(id=user_id)
 
         # Get user's current location if exists
-        location = None
-        coordinates = None
+        location = '--'
         try:
-            user_location = UserLocation.objects.filter(user=user).order_by('-timestamp').first()
+            user_location = UserLocation.objects.filter(user=user).order_by('-updated_at').first()
             if user_location:
                 location = user_location.location_name or f"{user_location.latitude}, {user_location.longitude}"
-                coordinates = f"{user_location.latitude:.4f}, {user_location.longitude:.4f}"
-        except:
-            pass
+        except Exception as e:
+            print(f"Error fetching location: {e}")
 
         user_data = {
             'success': True,
@@ -344,8 +342,7 @@ def admin_get_user_details(request, user_id):
                 'is_superuser': user.is_superuser,
                 'date_joined': user.date_joined.strftime('%B %d, %Y'),
                 'last_login': user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never',
-                'location': location or '--',
-                'coordinates': coordinates or '--',
+                'location': location,
             }
         }
         return JsonResponse(user_data)
